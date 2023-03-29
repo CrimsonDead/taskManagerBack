@@ -17,8 +17,14 @@ namespace DBL.Contexts
 
             var ids = new Guid[] {Guid.NewGuid(), Guid.NewGuid()};
 
-            builder.ApplyConfiguration(new JobContextConfiguration(ids));
             builder.ApplyConfiguration(new ProjectContextConfiguration(ids));
+
+            builder.ApplyConfiguration(new JobContextConfiguration(ids));
+
+            builder.Entity<Job>()
+                .HasOne(j => j.SubJob)
+                .WithMany(j => j.Jobs)
+                .OnDelete(DeleteBehavior.NoAction);
 
         }
     }

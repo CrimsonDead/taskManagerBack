@@ -6,7 +6,7 @@ namespace DBL.Models
     public class Project
     {
         [Key]
-        public Guid ProjectId { get; set; }
+        public int ProjectId { get; set; }
         public string Title  { get; set; }
         public string Description { get; set; }
         public ICollection<Job> Jobs { get; set; }

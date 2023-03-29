@@ -13,7 +13,7 @@ namespace DBL.Contexts
         }
         public void Configure(EntityTypeBuilder<Job> builder)
         {
-            
+
         }
     }
 }

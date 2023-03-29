@@ -6,13 +6,13 @@ namespace DBL.Models
     public class Job
     {
         [Key]
-        public Guid JobId { get; set; }
+        public int JobId { get; set; }
         public string Title  { get; set; }
         public string Description { get; set; }
         
         [ForeignKey("Job")]
         public int JobRefId { get; set; }
-        public Job SubJob { get; set; }
+        public Job? SubJob { get; set; }
         [ForeignKey("Project")]
         public int ProjectRefId { get; set; }
         public Project Project { get; set; }

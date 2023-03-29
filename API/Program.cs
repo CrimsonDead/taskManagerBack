@@ -13,6 +13,7 @@ builder.Services.AddControllers();
 string connectionString = builder.Environment.IsDevelopment() ?
     builder.Configuration.GetConnectionString("DefaultConnections") :
     builder.Configuration.GetConnectionString("DefaultConnections");
+//string connectionString = builder.Configuration.GetConnectionString("DevelopmentConnection");
 
 builder.Services.AddDbContext<ApplicationContext>(builder =>
 {

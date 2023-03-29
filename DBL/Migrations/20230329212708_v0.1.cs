@@ -33,7 +33,7 @@ namespace DBL.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     JobRefId = table.Column<int>(type: "int", nullable: false),
-                    SubJobJobId = table.Column<int>(type: "int", nullable: false),
+                    SubJobJobId = table.Column<int>(type: "int", nullable: true),
                     ProjectRefId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -43,8 +43,7 @@ namespace DBL.Migrations
                         name: "FK_Jobs_Jobs_SubJobJobId",
                         column: x => x.SubJobJobId,
                         principalTable: "Jobs",
-                        principalColumn: "JobId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "JobId");
                     table.ForeignKey(
                         name: "FK_Jobs_Projects_ProjectRefId",
                         column: x => x.ProjectRefId,
