@@ -6,11 +6,11 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProjeectController : ControllerBase
+    public class ProjectController : ControllerBase
     {
         private readonly IRepository<Project> _repository;
         private readonly ILogger<Project> _logger;
-        public ProjeectController(ILogger<Project> logger, IRepository<Project> repository)
+        public ProjectController(ILogger<Project> logger, IRepository<Project> repository)
         {
             _logger = logger;
             _repository = repository;
