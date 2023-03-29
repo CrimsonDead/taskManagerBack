@@ -3,7 +3,7 @@ using DBL.Models;
 
 namespace DBL.Contexts
 {
-    class ApplicationContext : DbContext
+    public class ApplicationContext : DbContext
     {
         public DbSet<Job> Jobs { get; set; }
         public DbSet<Project> Projects { get; set; }

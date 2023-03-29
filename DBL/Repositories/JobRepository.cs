@@ -1,32 +1,43 @@
 using DBL.Models;
+using DBL.Contexts;
 
 namespace DBL.Repositories
 {
     public class JobRepository : IRepository<Job>
     {
+        private readonly ApplicationContext _context;
+        public JobRepository(ApplicationContext context)
+        {
+            _context = context;          
+        }
         public Job AddItem(Job item)
         {
-            throw new NotImplementedException();
+            _context.Jobs.Add(item);
+            _context.SaveChanges();
+            return item;
         }
 
         public Job Delete(Job item)
         {
-            throw new NotImplementedException();
+            _context.Jobs.Remove(item);
+            _context.SaveChanges();
+            return item;
         }
 
         public Job GetItem(int id)
         {
-            throw new NotImplementedException();
+            return _context.Jobs.FirstOrDefault(j => j.JobId == id);
         }
 
         public IEnumerable<Job> GetItems()
         {
-            throw new NotImplementedException();
+            return _context.Jobs.ToList();
         }
 
         public Job Update(Job item)
         {
-            throw new NotImplementedException();
+            _context.Jobs.Update(item);
+            return item;
         }
     }
 }

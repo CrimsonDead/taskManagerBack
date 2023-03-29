@@ -1,32 +1,45 @@
 using DBL.Models;
+using DBL.Contexts;
 
 namespace DBL.Repositories
 {
     public class ProjectRepository : IRepository<Project>
     {
+        private readonly ApplicationContext _context;
+
+        public ProjectRepository(ApplicationContext context)
+        {
+            _context = context;
+        }
+
         public Project AddItem(Project item)
         {
-            throw new NotImplementedException();
+            _context.Projects.Add(item);
+            _context.SaveChanges();
+            return item;
         }
 
         public Project Delete(Project item)
         {
-            throw new NotImplementedException();
+            _context.Projects.Remove(item);
+            _context.SaveChanges();
+            return item;
         }
 
         public Project GetItem(int id)
         {
-            throw new NotImplementedException();
+            return _context.Projects.FirstOrDefault(p => p.ProjectId == id);
         }
 
         public IEnumerable<Project> GetItems()
         {
-            throw new NotImplementedException();
+            return _context.Projects.ToList();
         }
 
         public Project Update(Project item)
         {
-            throw new NotImplementedException();
+            _context.Projects.Update(item);
+            return item;
         }
     }
 }
