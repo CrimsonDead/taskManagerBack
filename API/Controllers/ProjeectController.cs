@@ -16,8 +16,7 @@ namespace API.Controllers
             _repository = repository;
         }
 
-        [HttpGet(Name = "GetProjectList")]
-        [Route("GetProjectList")]
+        [HttpGet("GetProjectList", Name = "GetProjectList")]
         public ActionResult<List<Project>> GetProjectList()
         {
             try
@@ -29,12 +28,11 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);                
+                return BadRequest(ex.Message);
             }
         }
 
-        [HttpGet(Name = "GetProject")]
-        [Route("GetProject")]
+        [HttpGet("GetProject", Name = "GetProject")]
         public ActionResult<Project> GetProject([FromQuery] int id)
         {
             try
@@ -46,52 +44,49 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);                
+                return BadRequest(ex.Message);
             }
         }
 
-        [HttpPost(Name = "AddProject")]
-        [Route("AddProject")]
+        [HttpPost("AddProject", Name = "AddProject")]
         public ActionResult AddProject([FromForm] Project project)
         {
-            try 
+            try
             {
                 _repository.AddItem(project);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);       
+                return BadRequest(ex.Message);
             }
         }
 
-        [HttpPut(Name = "ChangeProject")]
-        [Route("ChangeProject")]
+        [HttpPut("ChangeProject", Name = "ChangeProject")]
         public ActionResult ChangeProject([FromForm] Project project)
         {
-            try 
+            try
             {
                 _repository.Update(project);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);       
+                return BadRequest(ex.Message);
             }
         }
 
-        [HttpDelete(Name = "DeleteProject")]
-        [Route("DeleteProject")]
+        [HttpDelete("DeleteProject", Name = "DeleteProject")]
         public ActionResult DeleteProject([FromForm] Project project)
         {
-            try 
+            try
             {
                 _repository.Delete(project);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);       
+                return BadRequest(ex.Message);
             }
         }
 

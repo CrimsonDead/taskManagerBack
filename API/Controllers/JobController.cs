@@ -16,8 +16,7 @@ namespace API.Controllers
             _repository = repository;
         }
 
-        [HttpGet(Name = "GetJobList")]
-        [Route("GetJobList")]
+        [HttpGet("GetJobList", Name = "GetJobList")]
         public ActionResult<List<Job>> GetJobList()
         {
             try
@@ -33,8 +32,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpGet(Name = "GetJob")]
-        [Route("GetJob")]
+        [HttpGet("GetJob", Name = "GetJob")]
         public ActionResult<Job> GetJob([FromQuery] int id)
         {
             try
@@ -46,52 +44,49 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);                
+                return BadRequest(ex.Message);
             }
         }
 
-        [HttpPost(Name = "AddJob")]
-        [Route("AddJob")]
+        [HttpPost("AddJob", Name = "AddJob")]
         public ActionResult AddJob([FromForm] Job job)
         {
-            try 
+            try
             {
                 _repository.AddItem(job);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);       
+                return BadRequest(ex.Message);
             }
         }
 
-        [HttpPut(Name = "ChangeJob")]
-        [Route("ChangeJob")]
+        [HttpPut("ChangeJob", Name = "ChangeJob")]
         public ActionResult ChangeJob([FromForm] Job job)
         {
-            try 
+            try
             {
                 _repository.Update(job);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);       
+                return BadRequest(ex.Message);
             }
         }
 
-        [HttpDelete(Name = "DeleteJob")]
-        [Route("DeleteJob")]
+        [HttpDelete("DeleteJob", Name = "DeleteJob")]
         public ActionResult DeleteJob([FromForm] Job job)
         {
-            try 
+            try
             {
                 _repository.Delete(job);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);       
+                return BadRequest(ex.Message);
             }
         }
 
