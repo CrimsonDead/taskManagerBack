@@ -6,7 +6,7 @@ namespace DBL.Models
     public class Job
     {
         [Key]
-        public int JobId { get; set; }
+        public Guid JobId { get; set; }
         public string Title  { get; set; }
         public string Description { get; set; }
         
