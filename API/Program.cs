@@ -9,14 +9,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-string connectionString = builder.Environment.IsDevelopment() ?
-    builder.Configuration.GetConnectionString("DevelopmentConnection") :
-    builder.Configuration.GetConnectionString("ReleaseConnection");
-//string connectionString = builder.Configuration.GetConnectionString("DevelopmentConnection");
-
-builder.Services.AddDbContext<ApplicationContext>(builder =>
+// string connectionString = builder.Environment.IsDevelopment() ?
+//     builder.Configuration.GetConnectionString("DevelopmentConnection") :
+//     builder.Configuration.GetConnectionString("ReleaseConnection");
+string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+System.Console.WriteLine(connectionString);
+builder.Services.AddDbContext<ApplicationContext>(options =>
 {
-    builder.UseSqlServer(connectionString);
+    options.UseSqlServer(connectionString);
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -39,7 +39,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-//app.Map("/here", () => { return "I'm here"; });
+app.Map("/here", () => { return $"I'm here \n Connection string: {connectionString} \n Is development: {builder.Environment.IsDevelopment()}"; });
 app.MapControllers();
 
 app.Run();
