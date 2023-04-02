@@ -5,14 +5,13 @@ using DBL.Contexts;
 using DBL.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-
 // Add services to the container.
 
 builder.Services.AddControllers();
 
 string connectionString = builder.Environment.IsDevelopment() ?
-    builder.Configuration.GetConnectionString("DefaultConnections") :
-    builder.Configuration.GetConnectionString("DefaultConnections");
+    builder.Configuration.GetConnectionString("DevelopmentConnection") :
+    builder.Configuration.GetConnectionString("ReleaseConnection");
 //string connectionString = builder.Configuration.GetConnectionString("DevelopmentConnection");
 
 builder.Services.AddDbContext<ApplicationContext>(builder =>
@@ -40,6 +39,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+//app.Map("/here", () => { return "I'm here"; });
 app.MapControllers();
 
 app.Run();
