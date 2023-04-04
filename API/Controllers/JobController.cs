@@ -16,7 +16,22 @@ namespace API.Controllers
             _repository = repository;
         }
 
-        [HttpGet("GetJobList", Name = "GetJobList")]
+        [HttpGet("GetJobStatusList", Name = "statuslist/")]
+        public ActionResult<List<Job>> GetJobStatusList()
+        {
+            try
+            {
+                var statuses = new { Statuses = Enum.GetValues<JobStatus>() };
+
+                return Ok(statuses);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("GetJobList", Name = "list/")]
         public ActionResult<List<Job>> GetJobList()
         {
             try
@@ -32,7 +47,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpGet("GetJob", Name = "GetJob")]
+        [HttpGet("GetJob", Name = "item/")]
         public ActionResult<Job> GetJob([FromQuery] int id)
         {
             try
@@ -48,7 +63,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPost("AddJob", Name = "AddJob")]
+        [HttpPost("AddJob", Name = "create/")]
         public ActionResult AddJob([FromForm] Job job)
         {
             try
@@ -62,7 +77,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("ChangeJob", Name = "ChangeJob")]
+        [HttpPut("ChangeJob", Name = "update/")]
         public ActionResult ChangeJob([FromForm] Job job)
         {
             try
@@ -76,7 +91,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpDelete("DeleteJob", Name = "DeleteJob")]
+        [HttpDelete("DeleteJob", Name = "delete/")]
         public ActionResult DeleteJob([FromForm] Job job)
         {
             try

@@ -4,6 +4,7 @@ using DBL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DBL.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20230402174546_v0.2")]
+    partial class v02
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,30 +34,13 @@ namespace DBL.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("JobId"));
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<TimeSpan>("EstimetedTime")
-                        .HasColumnType("time");
-
-                    b.Property<int?>("JobRefId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Progreess")
+                    b.Property<int>("JobRefId")
                         .HasColumnType("int");
 
                     b.Property<int>("ProjectRefId")
-                        .HasColumnType("int");
-
-                    b.Property<TimeSpan>("SpentTime")
-                        .HasColumnType("time");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<int?>("SubJobJobId")
@@ -82,6 +68,7 @@ namespace DBL.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProjectId"));
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
@@ -91,31 +78,34 @@ namespace DBL.Migrations
                     b.HasKey("ProjectId");
 
                     b.ToTable("Projects");
-
-                    b.HasData(
-                        new
-                        {
-                            ProjectId = 1,
-                            Description = "SF mid 1x1",
-                            Title = "ZXC Lobby"
-                        });
                 });
 
             modelBuilder.Entity("DBL.Models.Job", b =>
                 {
                     b.HasOne("DBL.Models.Project", "Project")
-                        .WithMany()
+                        .WithMany("Jobs")
                         .HasForeignKey("ProjectRefId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("DBL.Models.Job", "SubJob")
-                        .WithMany()
-                        .HasForeignKey("SubJobJobId");
+                        .WithMany("Jobs")
+                        .HasForeignKey("SubJobJobId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Project");
 
                     b.Navigation("SubJob");
+                });
+
+            modelBuilder.Entity("DBL.Models.Job", b =>
+                {
+                    b.Navigation("Jobs");
+                });
+
+            modelBuilder.Entity("DBL.Models.Project", b =>
+                {
+                    b.Navigation("Jobs");
                 });
 #pragma warning restore 612, 618
         }

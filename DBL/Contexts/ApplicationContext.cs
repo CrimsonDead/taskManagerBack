@@ -9,6 +9,10 @@ namespace DBL.Contexts
         public DbSet<Project> Projects { get; set; }
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {
+            if (Database.EnsureCreated())
+            {
+                Database.Migrate();
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -21,10 +25,6 @@ namespace DBL.Contexts
 
             builder.ApplyConfiguration(new JobContextConfiguration(ids));
 
-            builder.Entity<Job>()
-                .HasOne(j => j.SubJob)
-                .WithMany(j => j.Jobs)
-                .OnDelete(DeleteBehavior.NoAction);
 
         }
     }
