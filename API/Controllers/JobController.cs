@@ -21,7 +21,12 @@ namespace API.Controllers
         {
             try
             {
-                var statuses = new { Statuses = Enum.GetValues<JobStatus>() };
+                var statuses = new Dictionary<int, string>();
+
+                foreach (var item in  Enum.GetValues<JobStatus>())
+                {
+                    statuses.Add((int)item, item.ToString());
+                }
 
                 return Ok(statuses);
             }
