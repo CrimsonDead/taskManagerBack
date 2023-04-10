@@ -19,11 +19,13 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseSqlServer(connectionString);
 });
  
-builder.Services.AddIdentity<User, UserRole>( options => {
+builder.Services.AddIdentity<User, UserRole>( options => 
+{
     options.Password.RequireDigit = true;
-});
+})
+.AddDefaultTokenProviders()
+.AddEntityFrameworkStores<ApplicationContext>();
 
-builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer( options => 
     {
@@ -38,6 +40,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
          };
     });
+
+builder.Services.AddAuthorization();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

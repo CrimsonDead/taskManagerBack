@@ -11,11 +11,29 @@ namespace API.Controllers
     {
         private readonly ILogger<User> _logger;
         private readonly SignInManager<User> _signInManager;
+        private readonly RoleManager<UserRole> _roleManager;
 
-        public UserController(ILogger<User> logger, SignInManager<User> signInManager)
+        public UserController(ILogger<User> logger, SignInManager<User> signInManager, RoleManager<UserRole> roleManager)
         {
             _logger = logger;
             _signInManager = signInManager;
+            _roleManager = roleManager;
+        }
+
+        [HttpGet("roles/", Name = "GetUserRoleList")]
+        public ActionResult<List<UserRole>> GetUserRoleList()
+        {
+            try
+            {
+                var roleList = _roleManager.Roles.ToList();
+                if (roleList.Count() == 0)
+                    throw new Exception("Server has no data");
+                return Ok(roleList);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("list/", Name = "GetUserList")]

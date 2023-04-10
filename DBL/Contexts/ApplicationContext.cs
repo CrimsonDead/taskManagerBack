@@ -26,6 +26,19 @@ namespace DBL.Contexts
 
             builder.ApplyConfiguration(new JobContextConfiguration(ids));
 
+            builder.Entity<UserRole>()
+                .HasData(
+                    new UserRole
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Name = "Admin"
+                    },
+                    new UserRole
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Name = "User"
+                    }
+                );
 
         }
     }

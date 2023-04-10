@@ -23,7 +23,7 @@ namespace DBL.Contexts
                         ProjectRefId    = _ids[0].ToString(),
                         StartDate       = DateTime.Now,
                         EndDate         = DateTime.Now + TimeSpan.FromHours(5.0f),
-                        EstimetedTime   = 
+                        EstimetedTime   = 3.5d
                     }
                 );
         }
