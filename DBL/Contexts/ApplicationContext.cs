@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using DBL.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace DBL.Contexts
 {
-    public class ApplicationContext : DbContext
+    public class ApplicationContext : IdentityDbContext<User>
     {
         public DbSet<Job> Jobs { get; set; }
         public DbSet<Project> Projects { get; set; }
@@ -19,7 +20,7 @@ namespace DBL.Contexts
         {
             base.OnModelCreating(builder);
 
-            var ids = new Guid[] {Guid.NewGuid(), Guid.NewGuid()};
+            var ids = new Guid[] {Guid.NewGuid()};
 
             builder.ApplyConfiguration(new ProjectContextConfiguration(ids));
 
