@@ -24,7 +24,7 @@ namespace DBL.Repositories
             return item;
         }
 
-        public Job GetItem(int id)
+        public Job GetItem(string id)
         {
             return _context.Jobs.FirstOrDefault(j => j.JobId == id);
         }

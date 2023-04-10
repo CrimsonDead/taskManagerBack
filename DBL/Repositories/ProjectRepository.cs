@@ -26,7 +26,7 @@ namespace DBL.Repositories
             return item;
         }
 
-        public Project GetItem(int id)
+        public Project GetItem(string id)
         {
             return _context.Projects.FirstOrDefault(p => p.ProjectId == id);
         }
