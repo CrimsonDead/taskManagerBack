@@ -13,16 +13,16 @@ namespace DBL.Models
         [Required]
         public DateTime StartDate { get; set; }
         public DateTime ?EndDate { get; set; }
-        public int ?EstimetedTime { get; set; } // In hours
-        public int ?SpentTime { get; set; }     // In hours
+        public double ?EstimetedTime { get; set; } // In hours
+        public double ?SpentTime { get; set; }     // In hours
         public int ?Progreess { get; set; }
         [Required]
         public JobStatus Status { get; set; }
 
         [ForeignKey("Job")]
-        public int ?JobRefId { get; set; }
+        public string ?JobRefId { get; set; }
         [ForeignKey("Project")]
         [Required]
-        public int ProjectRefId { get; set; }
+        public string ProjectRefId { get; set; }
     }
 }

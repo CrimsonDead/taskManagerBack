@@ -6,7 +6,7 @@ namespace DBL.Models
     public class Project
     {
         [Key]
-        public int ProjectId { get; set; }
+        public string ProjectId { get; set; }
         [Required]
         public string Title  { get; set; }
         public string ?Description { get; set; }

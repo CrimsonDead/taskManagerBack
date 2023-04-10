@@ -16,7 +16,7 @@ namespace API.Controllers
             _repository = repository;
         }
 
-        [HttpGet("GetProjectList", Name = "GetProjectList")]
+        [HttpGet("list/", Name = "GetProjectList")]
         public ActionResult<List<Project>> GetProjectList()
         {
             try
@@ -32,8 +32,8 @@ namespace API.Controllers
             }
         }
 
-        [HttpGet("GetProject", Name = "GetProject")]
-        public ActionResult<Project> GetProject([FromQuery] int id)
+        [HttpGet("item/", Name = "GetProject")]
+        public ActionResult<Project> GetProject([FromQuery] string id)
         {
             try
             {
@@ -48,7 +48,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPost("AddProject", Name = "AddProject")]
+        [HttpPost("create/", Name = "AddProject")]
         public ActionResult AddProject([FromForm] Project project)
         {
             try
@@ -62,7 +62,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("ChangeProject", Name = "ChangeProject")]
+        [HttpPut("update/", Name = "ChangeProject")]
         public ActionResult ChangeProject([FromForm] Project project)
         {
             try
@@ -76,7 +76,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpDelete("DeleteProject", Name = "DeleteProject")]
+        [HttpDelete("delete/", Name = "DeleteProject")]
         public ActionResult DeleteProject([FromForm] Project project)
         {
             try

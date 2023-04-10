@@ -16,7 +16,7 @@ namespace API.Controllers
             _repository = repository;
         }
 
-        [HttpGet("GetJobStatusList", Name = "statuslist/")]
+        [HttpGet("statuslist/", Name = "GetJobStatusList")]
         public ActionResult<List<Job>> GetJobStatusList()
         {
             try
@@ -36,7 +36,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpGet("GetJobList", Name = "list/")]
+        [HttpGet("list/", Name = "GetJobList")]
         public ActionResult<List<Job>> GetJobList()
         {
             try
@@ -52,8 +52,8 @@ namespace API.Controllers
             }
         }
 
-        [HttpGet("GetJob", Name = "item/")]
-        public ActionResult<Job> GetJob([FromQuery] int id)
+        [HttpGet("item/", Name = "GetJob")]
+        public ActionResult<Job> GetJob([FromQuery] string id)
         {
             try
             {
@@ -68,7 +68,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPost("AddJob", Name = "create/")]
+        [HttpPost("create/", Name = "AddJob")]
         public ActionResult AddJob([FromForm] Job job)
         {
             try
@@ -82,7 +82,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("ChangeJob", Name = "update/")]
+        [HttpPut("update/", Name = "ChangeJob")]
         public ActionResult ChangeJob([FromForm] Job job)
         {
             try
@@ -96,7 +96,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpDelete("DeleteJob", Name = "delete/")]
+        [HttpDelete("delete/", Name = "DeleteJob")]
         public ActionResult DeleteJob([FromForm] Job job)
         {
             try
