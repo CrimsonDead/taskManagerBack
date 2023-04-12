@@ -11,7 +11,8 @@ namespace DBL.Contexts
         {
             _ids = ids;
         }
-        public void Configure(EntityTypeBuilder<Project> builder)
+
+        private void SeedData(EntityTypeBuilder<Project> builder)
         {
             builder
                 .HasData(
@@ -23,5 +24,11 @@ namespace DBL.Contexts
                     }
                 );
         }
+
+        public void Configure(EntityTypeBuilder<Project> builder)
+        {
+            
+        }
+
     }
 }

@@ -11,7 +11,8 @@ namespace DBL.Contexts
         {
             _ids = ids;
         }
-        public void Configure(EntityTypeBuilder<Job> builder)
+
+        private void SeedData(EntityTypeBuilder<Job> builder)
         {
             builder
                 .HasData(
@@ -26,6 +27,11 @@ namespace DBL.Contexts
                         EstimetedTime   = 3.5d
                     }
                 );
+        }
+
+        public void Configure(EntityTypeBuilder<Job> builder)
+        {
+            
         }
     }
 }
