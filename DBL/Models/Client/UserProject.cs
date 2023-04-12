@@ -2,13 +2,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 
-namespace DBL.Models
+namespace DBL.Models.Client
 {
-    public class UserJob : IdentityUser
+    public class UserProject
     {
         [ForeignKey("User")]
         public string UserId { get; set; }
-        [ForeignKey("Job")]
-        public string JobId { get; set; }
+        [ForeignKey("Project")]
+        public string ProjectId { get; set; }
     }
 }

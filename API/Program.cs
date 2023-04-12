@@ -5,12 +5,32 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using DBL.Repositories;
 using DBL.Contexts;
-using DBL.Models;
+using Microsoft.AspNetCore.HttpOverrides;
+using DBL.Models.Server;
+
+var AllowSpecificOrigins = "allowedSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: AllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins("http://crimssondead-001-site1.ftempurl.com/taskmanager")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 builder.Services.AddControllers();
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+});
 
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -19,7 +39,7 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseSqlServer(connectionString);
 });
  
-builder.Services.AddIdentity<User, UserRole>( options => 
+builder.Services.AddIdentity<UserModel, UserRoleModel>( options => 
 {
     options.Password.RequireDigit = true;
 })
@@ -47,10 +67,14 @@ builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IRepository<Job>, JobRepository>();
-builder.Services.AddScoped<IRepository<Project>, ProjectRepository>();
+builder.Services.AddScoped<IEntityRepository<JobModel, string>, JobRepository>();
+builder.Services.AddScoped<IEntityRepository<ProjectModel, string>, ProjectRepository>();
+builder.Services.AddScoped<IRelationEntityRepository<UserJobModel, string, string>, UserJobRepository>();
+builder.Services.AddScoped<IRelationEntityRepository<UserProjectModel, string, string>, UserProjectRepository>();
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -58,13 +82,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseCors(AllowSpecificOrigins);
 
 app.UseAuthorization();
 app.UseAuthentication();
 
-app.Map("/here", () => { return $"I'm here \n Connection string: {connectionString} \n Is development: {builder.Environment.IsDevelopment()}"; });
+app.Map("/here", () => { return $"I'm here"; });
 app.MapControllers();
 
 app.Run();

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using DBL.Repositories;
-using DBL.Models;
+using DBL.Models.Client;
+using DBL.Models.Server;
 
 namespace API.Controllers
 {
@@ -8,23 +9,35 @@ namespace API.Controllers
     [ApiController]
     public class ProjectController : ControllerBase
     {
-        private readonly IRepository<Project> _repository;
-        private readonly ILogger<Project> _logger;
-        public ProjectController(ILogger<Project> logger, IRepository<Project> repository)
+        private readonly IEntityRepository<ProjectModel, string> _repository;
+        private readonly ILogger<ProjectModel> _logger;
+        public ProjectController(ILogger<ProjectModel> logger, IEntityRepository<ProjectModel, string> repository)
         {
             _logger = logger;
             _repository = repository;
         }
 
         [HttpGet("list/", Name = "GetProjectList")]
-        public ActionResult<List<Project>> GetProjectList()
+        public ActionResult<List<object>> GetProjectList()
         {
             try
             {
                 var dataList = _repository.GetItems();
-                if (dataList.Count() == 0)
-                    throw new Exception("Server has no data");
-                return Ok(dataList);
+                List<object> outList = new List<object>();
+
+                foreach (var project in dataList)
+                {
+                    outList.Add(
+                        new
+                        {
+                            ProjectId = project.ProjectId,
+                            Title = project.Title,
+                            Description = project.Description
+                        }
+                    );
+                }
+
+                return Ok(outList);
             }
             catch (Exception ex)
             {
@@ -33,13 +46,15 @@ namespace API.Controllers
         }
 
         [HttpGet("item/", Name = "GetProject")]
-        public ActionResult<Project> GetProject([FromQuery] string id)
+        public ActionResult<ProjectModel> GetProject([FromQuery] string id)
         {
             try
             {
                 var data = _repository.GetItem(id);
+
                 if (data is null)
                     throw new Exception($"Server has no data with id {id}");
+
                 return Ok(data);
             }
             catch (Exception ex)
@@ -49,12 +64,16 @@ namespace API.Controllers
         }
 
         [HttpPost("create/", Name = "AddProject")]
-        public ActionResult AddProject([FromForm] Project project)
+        public ActionResult AddProject([FromBody] Project project)
         {
             try
             {
-                _repository.AddItem(project);
-                return Ok();
+                ProjectModel projectModel = (ProjectModel)project;
+                projectModel.ProjectId = Guid.NewGuid().ToString();
+
+                _repository.AddItem(projectModel);
+
+                return Ok(projectModel.ProjectId);
             }
             catch (Exception ex)
             {
@@ -63,11 +82,15 @@ namespace API.Controllers
         }
 
         [HttpPut("update/", Name = "ChangeProject")]
-        public ActionResult ChangeProject([FromForm] Project project)
+        public ActionResult ChangeProject([FromBody] IdentifiableProject project)
         {
             try
             {
-                _repository.Update(project);
+                ProjectModel projectModel = (ProjectModel)(Project)project;
+                projectModel.ProjectId = project.ProjectId;
+
+                _repository.Update(projectModel);
+
                 return Ok();
             }
             catch (Exception ex)
@@ -77,11 +100,11 @@ namespace API.Controllers
         }
 
         [HttpDelete("delete/", Name = "DeleteProject")]
-        public ActionResult DeleteProject([FromForm] Project project)
+        public ActionResult DeleteProject([FromBody] string projectId)
         {
             try
             {
-                _repository.Delete(project);
+                _repository.Delete(projectId);
                 return Ok();
             }
             catch (Exception ex)

@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using DBL.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using DBL.Models.Server;
 
 namespace DBL.Contexts
 {
-    public class JobContextConfiguration : IEntityTypeConfiguration<Job>
+    public class JobContextConfiguration : IEntityTypeConfiguration<JobModel>
     {
         private Guid[] _ids;
         public JobContextConfiguration(Guid[] ids)
@@ -12,11 +12,11 @@ namespace DBL.Contexts
             _ids = ids;
         }
 
-        private void SeedData(EntityTypeBuilder<Job> builder)
+        private void SeedData(EntityTypeBuilder<JobModel> builder)
         {
             builder
                 .HasData(
-                    new Job
+                    new JobModel
                     {
                         JobId           = Guid.NewGuid().ToString(),
                         Title           = "Pick Shadow Fiend",
@@ -29,9 +29,17 @@ namespace DBL.Contexts
                 );
         }
 
-        public void Configure(EntityTypeBuilder<Job> builder)
+        public void Configure(EntityTypeBuilder<JobModel> builder)
         {
-            
+            builder
+                .HasOne(j => j.Project)
+                .WithMany(p => p.Jobs)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder
+                .HasOne(j => j.SubJob)
+                .WithMany(j => j.Jobs)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

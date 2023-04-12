@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DBL.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20230410192115_v0.10")]
-    partial class v010
+    [Migration("20230412221321_v0.2")]
+    partial class v02
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace DBL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("DBL.Models.Job", b =>
+            modelBuilder.Entity("DBL.Models.Server.JobModel", b =>
                 {
                     b.Property<string>("JobId")
                         .HasColumnType("nvarchar(450)");
@@ -47,7 +47,7 @@ namespace DBL.Migrations
 
                     b.Property<string>("ProjectRefId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<double?>("SpentTime")
                         .HasColumnType("float");
@@ -58,29 +58,24 @@ namespace DBL.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<string>("SubJobJobId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("JobId");
 
-                    b.ToTable("Jobs");
+                    b.HasIndex("ProjectRefId");
 
-                    b.HasData(
-                        new
-                        {
-                            JobId = "14bf420b-8fa8-4b00-b045-77f1f7a1044d",
-                            Description = "Pick Shadow Fiend as your opponent",
-                            EndDate = new DateTime(2023, 4, 11, 3, 21, 15, 414, DateTimeKind.Local).AddTicks(491),
-                            EstimetedTime = 3.5,
-                            ProjectRefId = "b3bd10bd-4aa4-4f65-9b1f-2c07943ee576",
-                            StartDate = new DateTime(2023, 4, 10, 22, 21, 15, 414, DateTimeKind.Local).AddTicks(466),
-                            Status = 0,
-                            Title = "Pick Shadow Fiend"
-                        });
+                    b.HasIndex("SubJobJobId");
+
+                    b.ToTable("Jobs");
                 });
 
-            modelBuilder.Entity("DBL.Models.Project", b =>
+            modelBuilder.Entity("DBL.Models.Server.ProjectModel", b =>
                 {
                     b.Property<string>("ProjectId")
                         .HasColumnType("nvarchar(450)");
@@ -95,17 +90,29 @@ namespace DBL.Migrations
                     b.HasKey("ProjectId");
 
                     b.ToTable("Projects");
-
-                    b.HasData(
-                        new
-                        {
-                            ProjectId = "b3bd10bd-4aa4-4f65-9b1f-2c07943ee576",
-                            Description = "Shadow fiend ",
-                            Title = "ZXC lobby"
-                        });
                 });
 
-            modelBuilder.Entity("DBL.Models.User", b =>
+            modelBuilder.Entity("DBL.Models.Server.UserJobModel", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("JobId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserModelId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("UserId", "JobId");
+
+                    b.HasIndex("JobId");
+
+                    b.HasIndex("UserModelId");
+
+                    b.ToTable("UsersJobs");
+                });
+
+            modelBuilder.Entity("DBL.Models.Server.UserModel", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -168,6 +175,21 @@ namespace DBL.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("DBL.Models.Server.UserProjectModel", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProjectId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("UserId", "ProjectId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("UsersProjects");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -311,25 +333,92 @@ namespace DBL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("DBL.Models.UserRole", b =>
+            modelBuilder.Entity("DBL.Models.Server.UserRoleModel", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRole");
 
-                    b.HasDiscriminator().HasValue("UserRole");
+                    b.HasDiscriminator().HasValue("UserRoleModel");
 
                     b.HasData(
                         new
                         {
-                            Id = "08603dba-1d3f-4ca5-8c11-10c83c242d63",
-                            ConcurrencyStamp = "f26a765e-687c-41c4-b95c-e408e1af02a1",
+                            Id = "fcbf87e9-c9c0-4e57-87ca-d86fa80b58b1",
+                            ConcurrencyStamp = "4e883cd1-f475-4272-b03b-5bded871cfc9",
                             Name = "Admin"
                         },
                         new
                         {
-                            Id = "1e5ca039-f716-4cbd-8970-03dae0c89249",
-                            ConcurrencyStamp = "a7948f9f-068d-4af2-8a29-7fcedd5d05a9",
+                            Id = "009d5cd9-f6b2-44ab-8e9d-02e8d50d8483",
+                            ConcurrencyStamp = "6cc3bb43-7406-47fc-9905-0862ac5e2033",
+                            Name = "Manager"
+                        },
+                        new
+                        {
+                            Id = "317035be-99f5-4ed2-a1a9-81fdb4104180",
+                            ConcurrencyStamp = "7168d24f-36e9-4d15-8e0f-6007f42c7935",
                             Name = "User"
                         });
+                });
+
+            modelBuilder.Entity("DBL.Models.Server.JobModel", b =>
+                {
+                    b.HasOne("DBL.Models.Server.ProjectModel", "Project")
+                        .WithMany("Jobs")
+                        .HasForeignKey("ProjectRefId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DBL.Models.Server.JobModel", "SubJob")
+                        .WithMany("Jobs")
+                        .HasForeignKey("SubJobJobId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("SubJob");
+                });
+
+            modelBuilder.Entity("DBL.Models.Server.UserJobModel", b =>
+                {
+                    b.HasOne("DBL.Models.Server.JobModel", "Job")
+                        .WithMany("Users")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DBL.Models.Server.UserModel", "User")
+                        .WithMany("Jobs")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DBL.Models.Server.UserModel", null)
+                        .WithMany("MyProperty")
+                        .HasForeignKey("UserModelId");
+
+                    b.Navigation("Job");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DBL.Models.Server.UserProjectModel", b =>
+                {
+                    b.HasOne("DBL.Models.Server.ProjectModel", "Project")
+                        .WithMany("Users")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DBL.Models.Server.UserModel", "User")
+                        .WithMany("Projects")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -343,7 +432,7 @@ namespace DBL.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("DBL.Models.User", null)
+                    b.HasOne("DBL.Models.Server.UserModel", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -352,7 +441,7 @@ namespace DBL.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("DBL.Models.User", null)
+                    b.HasOne("DBL.Models.Server.UserModel", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -367,7 +456,7 @@ namespace DBL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DBL.Models.User", null)
+                    b.HasOne("DBL.Models.Server.UserModel", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -376,11 +465,34 @@ namespace DBL.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("DBL.Models.User", null)
+                    b.HasOne("DBL.Models.Server.UserModel", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("DBL.Models.Server.JobModel", b =>
+                {
+                    b.Navigation("Jobs");
+
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("DBL.Models.Server.ProjectModel", b =>
+                {
+                    b.Navigation("Jobs");
+
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("DBL.Models.Server.UserModel", b =>
+                {
+                    b.Navigation("Jobs");
+
+                    b.Navigation("MyProperty");
+
+                    b.Navigation("Projects");
                 });
 #pragma warning restore 612, 618
         }

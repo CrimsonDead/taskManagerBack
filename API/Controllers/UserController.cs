@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using DBL.Repositories;
-using DBL.Models;
 using Microsoft.AspNetCore.Identity;
+using DBL.Models.Client;
 
 namespace API.Controllers
 {
@@ -63,7 +63,7 @@ namespace API.Controllers
         }
 
         [HttpPost("login/", Name = "LoginUser")]
-        public ActionResult LoginUser([FromForm] User user)
+        public ActionResult LoginUser([FromBody] User user)
         {
             try
             {
@@ -76,7 +76,7 @@ namespace API.Controllers
         }
 
         [HttpPost("register/", Name = "RegUser")]
-        public ActionResult RegisterUser([FromForm] User user)
+        public ActionResult RegisterUser([FromBody] User user)
         {
             try
             {
@@ -89,7 +89,7 @@ namespace API.Controllers
         }
 
         [HttpPut("update/", Name = "ChangeUser")]
-        public ActionResult ChangeUser([FromForm] User user)
+        public ActionResult ChangeUser([FromBody] User user)
         {
             try
             {
@@ -102,7 +102,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("delete/", Name = "DeleteUser")]
-        public ActionResult DeleteUser([FromForm] User user)
+        public ActionResult DeleteUser([FromBody] User user)
         {
             try
             {

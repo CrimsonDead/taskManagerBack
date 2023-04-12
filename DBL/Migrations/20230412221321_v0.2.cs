@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DBL.Migrations
 {
     /// <inheritdoc />
-    public partial class v010 : Migration
+    public partial class v02 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,27 +51,6 @@ namespace DBL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Jobs",
-                columns: table => new
-                {
-                    JobId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    EstimetedTime = table.Column<double>(type: "float", nullable: true),
-                    SpentTime = table.Column<double>(type: "float", nullable: true),
-                    Progreess = table.Column<int>(type: "int", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    JobRefId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ProjectRefId = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Jobs", x => x.JobId);
                 });
 
             migrationBuilder.CreateTable(
@@ -193,24 +172,103 @@ namespace DBL.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Jobs",
+                columns: table => new
+                {
+                    JobId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    SubJobJobId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EstimetedTime = table.Column<double>(type: "float", nullable: true),
+                    SpentTime = table.Column<double>(type: "float", nullable: true),
+                    Progreess = table.Column<int>(type: "int", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    JobRefId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProjectRefId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Jobs", x => x.JobId);
+                    table.ForeignKey(
+                        name: "FK_Jobs_Jobs_SubJobJobId",
+                        column: x => x.SubJobJobId,
+                        principalTable: "Jobs",
+                        principalColumn: "JobId",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Jobs_Projects_ProjectRefId",
+                        column: x => x.ProjectRefId,
+                        principalTable: "Projects",
+                        principalColumn: "ProjectId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UsersProjects",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProjectId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UsersProjects", x => new { x.UserId, x.ProjectId });
+                    table.ForeignKey(
+                        name: "FK_UsersProjects_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UsersProjects_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "ProjectId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UsersJobs",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    JobId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserModelId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UsersJobs", x => new { x.UserId, x.JobId });
+                    table.ForeignKey(
+                        name: "FK_UsersJobs_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UsersJobs_AspNetUsers_UserModelId",
+                        column: x => x.UserModelId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_UsersJobs_Jobs_JobId",
+                        column: x => x.JobId,
+                        principalTable: "Jobs",
+                        principalColumn: "JobId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Discriminator", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "08603dba-1d3f-4ca5-8c11-10c83c242d63", "f26a765e-687c-41c4-b95c-e408e1af02a1", "UserRole", "Admin", null },
-                    { "1e5ca039-f716-4cbd-8970-03dae0c89249", "a7948f9f-068d-4af2-8a29-7fcedd5d05a9", "UserRole", "User", null }
+                    { "009d5cd9-f6b2-44ab-8e9d-02e8d50d8483", "6cc3bb43-7406-47fc-9905-0862ac5e2033", "UserRoleModel", "Manager", null },
+                    { "317035be-99f5-4ed2-a1a9-81fdb4104180", "7168d24f-36e9-4d15-8e0f-6007f42c7935", "UserRoleModel", "User", null },
+                    { "fcbf87e9-c9c0-4e57-87ca-d86fa80b58b1", "4e883cd1-f475-4272-b03b-5bded871cfc9", "UserRoleModel", "Admin", null }
                 });
-
-            migrationBuilder.InsertData(
-                table: "Jobs",
-                columns: new[] { "JobId", "Description", "EndDate", "EstimetedTime", "JobRefId", "Progreess", "ProjectRefId", "SpentTime", "StartDate", "Status", "Title" },
-                values: new object[] { "14bf420b-8fa8-4b00-b045-77f1f7a1044d", "Pick Shadow Fiend as your opponent", new DateTime(2023, 4, 11, 3, 21, 15, 414, DateTimeKind.Local).AddTicks(491), 3.5, null, null, "b3bd10bd-4aa4-4f65-9b1f-2c07943ee576", null, new DateTime(2023, 4, 10, 22, 21, 15, 414, DateTimeKind.Local).AddTicks(466), 0, "Pick Shadow Fiend" });
-
-            migrationBuilder.InsertData(
-                table: "Projects",
-                columns: new[] { "ProjectId", "Description", "Title" },
-                values: new object[] { "b3bd10bd-4aa4-4f65-9b1f-2c07943ee576", "Shadow fiend ", "ZXC lobby" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -250,6 +308,31 @@ namespace DBL.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Jobs_ProjectRefId",
+                table: "Jobs",
+                column: "ProjectRefId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Jobs_SubJobJobId",
+                table: "Jobs",
+                column: "SubJobJobId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UsersJobs_JobId",
+                table: "UsersJobs",
+                column: "JobId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UsersJobs_UserModelId",
+                table: "UsersJobs",
+                column: "UserModelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UsersProjects_ProjectId",
+                table: "UsersProjects",
+                column: "ProjectId");
         }
 
         /// <inheritdoc />
@@ -271,16 +354,22 @@ namespace DBL.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Jobs");
+                name: "UsersJobs");
 
             migrationBuilder.DropTable(
-                name: "Projects");
+                name: "UsersProjects");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "Jobs");
+
+            migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Projects");
         }
     }
 }

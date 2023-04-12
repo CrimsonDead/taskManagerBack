@@ -1,9 +1,10 @@
-using DBL.Models;
 using DBL.Contexts;
+using DBL.Models.Server;
 
 namespace DBL.Repositories
 {
-    public class UserProjectRepository : IRepository<Project>
+    public class UserProjectRepository : 
+        IRelationEntityRepository<UserProjectModel, string, string>
     {
         private readonly ApplicationContext _context;
 
@@ -12,29 +13,36 @@ namespace DBL.Repositories
             _context = context;
         }
 
-        public Project AddItem(Project item)
+        public UserProjectModel AddItem(UserProjectModel item)
         {
-            throw new NotImplementedException();
+            _context.UsersProjects.Add(item);
+            _context.SaveChanges();
+            return item;
         }
 
-        public Project Delete(Project item)
+        public void Delete(string userId, string projectId)
         {
-            throw new NotImplementedException();
+            var item = GetItem(userId, projectId);
+            _context.UsersProjects.Remove(item);
+            _context.SaveChanges();
         }
 
-        public Project GetItem(string id)
+        public UserProjectModel GetItem(string userId, string projectId)
         {
-            throw new NotImplementedException();
+            return _context.UsersProjects.FirstOrDefault(
+                up => up.UserId == userId && up.ProjectId == projectId
+            );
         }
 
-        public IEnumerable<Project> GetItems()
+        public IEnumerable<UserProjectModel> GetItems()
         {
-            throw new NotImplementedException();
+            return _context.UsersProjects.ToList();
         }
 
-        public Project Update(Project item)
+        public UserProjectModel Update(UserProjectModel item)
         {
-            throw new NotImplementedException();
+            _context.UsersProjects.Update(item);
+            return item;
         }
     }
 }

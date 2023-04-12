@@ -1,11 +1,10 @@
 namespace DBL.Repositories
 {
-    public interface IRepository<T> where T : class
+    public interface IRepository<TEntity> 
+        where TEntity : class
     {
-        IEnumerable<T> GetItems();
-        T GetItem(string id);
-        T AddItem(T item);
-        T Update(T item);
-        T Delete(T item);
+        IEnumerable<TEntity> GetItems();
+        TEntity AddItem(TEntity item);
+        TEntity Update(TEntity item);
     }
 }

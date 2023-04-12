@@ -1,9 +1,9 @@
-using DBL.Models;
 using DBL.Contexts;
+using DBL.Models.Server;
 
 namespace DBL.Repositories
 {
-    public class ProjectRepository : IRepository<Project>
+    public class ProjectRepository : IEntityRepository<ProjectModel, string>
     {
         private readonly ApplicationContext _context;
 
@@ -12,31 +12,31 @@ namespace DBL.Repositories
             _context = context;
         }
 
-        public Project AddItem(Project item)
+        public ProjectModel AddItem(ProjectModel item)
         {
             _context.Projects.Add(item);
             _context.SaveChanges();
             return item;
         }
 
-        public Project Delete(Project item)
+        public void Delete(string id)
         {
-            _context.Projects.Remove(item);
+            var project = GetItem(id);
+            _context.Projects.Remove(project);
             _context.SaveChanges();
-            return item;
         }
 
-        public Project GetItem(string id)
+        public ProjectModel GetItem(string id)
         {
             return _context.Projects.FirstOrDefault(p => p.ProjectId == id);
         }
 
-        public IEnumerable<Project> GetItems()
+        public IEnumerable<ProjectModel> GetItems()
         {
             return _context.Projects.ToList();
         }
 
-        public Project Update(Project item)
+        public ProjectModel Update(ProjectModel item)
         {
             _context.Projects.Update(item);
             return item;

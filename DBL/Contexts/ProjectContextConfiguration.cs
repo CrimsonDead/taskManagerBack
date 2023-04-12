@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using DBL.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using DBL.Models.Server;
 
 namespace DBL.Contexts
 {
-    public class ProjectContextConfiguration : IEntityTypeConfiguration<Project>
+    public class ProjectContextConfiguration : IEntityTypeConfiguration<ProjectModel>
     {
         private Guid[] _ids;
         public ProjectContextConfiguration(Guid[] ids)
@@ -12,23 +12,22 @@ namespace DBL.Contexts
             _ids = ids;
         }
 
-        private void SeedData(EntityTypeBuilder<Project> builder)
+        private void SeedData(EntityTypeBuilder<JobModel> builder)
         {
             builder
                 .HasData(
-                    new Project 
+                    new ProjectModel
                     {
-                        ProjectId   = _ids[0].ToString(),
-                        Title       = "ZXC lobby",
+                        ProjectId = _ids[0].ToString(),
+                        Title = "ZXC lobby",
                         Description = "Shadow fiend "
                     }
                 );
         }
 
-        public void Configure(EntityTypeBuilder<Project> builder)
+        public void Configure(EntityTypeBuilder<ProjectModel> builder)
         {
             
         }
-
     }
 }
