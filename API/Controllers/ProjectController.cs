@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using DBL.Repositories;
+using DBL.Models;
 using DBL.Models.Client;
 using DBL.Models.Server;
 
@@ -68,7 +69,7 @@ namespace API.Controllers
         {
             try
             {
-                ProjectModel projectModel = (ProjectModel)project;
+                ProjectModel projectModel = ClientServerModelsMapping.Project2ProjectModel(project);
                 projectModel.ProjectId = Guid.NewGuid().ToString();
 
                 _repository.AddItem(projectModel);
@@ -86,7 +87,7 @@ namespace API.Controllers
         {
             try
             {
-                ProjectModel projectModel = (ProjectModel)(Project)project;
+                ProjectModel projectModel = ClientServerModelsMapping.Project2ProjectModel(project);
                 projectModel.ProjectId = project.ProjectId;
 
                 _repository.Update(projectModel);

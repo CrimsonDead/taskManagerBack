@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using DBL.Repositories;
+using DBL.Models;
 using DBL.Models.Client;
 using DBL.Models.Server;
 
@@ -89,7 +90,7 @@ namespace API.Controllers
         {
             try
             {
-                JobModel jobModel = (JobModel)job;
+                JobModel jobModel = ClientServerModelsMapping.Job2JobModel(job);
                 jobModel.JobId = Guid.NewGuid().ToString();
 
                 _repository.AddItem(jobModel);
@@ -107,7 +108,7 @@ namespace API.Controllers
         {
             try
             {
-                JobModel jobModel = (JobModel)(Job)job;
+                JobModel jobModel = ClientServerModelsMapping.Job2JobModel(job);
                 jobModel.JobId = job.JobId;
 
                 _repository.Update(jobModel);
