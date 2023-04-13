@@ -52,6 +52,7 @@ namespace API.Controllers
             try
             {
                 var data = _repository.GetItem(id);
+                data.ProjectClearLinks();
 
                 if (data is null)
                     throw new Exception($"Server has no data with id {id}");

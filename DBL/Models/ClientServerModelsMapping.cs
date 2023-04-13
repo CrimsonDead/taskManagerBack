@@ -40,5 +40,41 @@ namespace DBL.Models
             return projectModel;
         }
 
+        public static ProjectModel ProjectClearLinks(this ProjectModel project)
+        {
+            foreach (var item in project.Jobs)
+            {
+                item.SubJob = null;
+            }
+
+            foreach (var item in project.Users)
+            {
+                item.User = null;
+                item.Project = null;
+            }
+
+            return project;
+        }
+
+        public static JobModel JobClearLinks(this JobModel job)
+        {
+            job.SubJob = null;
+
+            job.Project = null;
+
+            foreach (var item in job.Jobs)
+            {
+                item.SubJob = null;
+            }
+
+            foreach (var item in job.Users)
+            {
+                item.User = null;
+                item.Job = null;
+            }
+
+            return job;
+        }
+
     }
 }

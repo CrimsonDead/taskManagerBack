@@ -7,7 +7,6 @@ namespace DBL.Models.Client
 {
     public class User : IdentityUser
     {
-        public ICollection<UserProjectModel> Projects { get; set; }
-        public ICollection<UserJobModel> Jobs { get; set; }
+
     }
 }
