@@ -28,7 +28,12 @@ namespace DBL.Repositories
 
         public ProjectModel GetItem(string id)
         {
-            return _context.Projects.FirstOrDefault(p => p.ProjectId == id);
+            var item = _context.Projects.FirstOrDefault(p => p.ProjectId == id);
+
+            item.Jobs = _context.Jobs.Where(j => j.ProjectRefId == item.ProjectId).ToList();
+            item.Users = _context.UsersProjects.Where(up => up.ProjectId == item.ProjectId).ToList();
+
+            return item;
         }
 
         public IEnumerable<ProjectModel> GetItems()
