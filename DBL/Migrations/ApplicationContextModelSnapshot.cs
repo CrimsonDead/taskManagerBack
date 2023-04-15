@@ -39,7 +39,7 @@ namespace DBL.Migrations
                     b.Property<string>("JobRefId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Progreess")
+                    b.Property<int?>("Progress")
                         .HasColumnType("int");
 
                     b.Property<string>("ProjectRefId")
@@ -96,14 +96,9 @@ namespace DBL.Migrations
                     b.Property<string>("JobId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("UserModelId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("UserId", "JobId");
 
                     b.HasIndex("JobId");
-
-                    b.HasIndex("UserModelId");
 
                     b.ToTable("UsersJobs");
                 });
@@ -338,20 +333,20 @@ namespace DBL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "8789703c-cbc7-4f2f-999d-a2e5fc399d32",
-                            ConcurrencyStamp = "e54cf4fe-90ab-4183-9b1e-da09e1f54ccb",
+                            Id = "63875343-d75a-49f7-8e29-8eb28f8c8716",
+                            ConcurrencyStamp = "f1f168cd-4656-4c22-bb9f-b871ab3cb8e8",
                             Name = "Admin"
                         },
                         new
                         {
-                            Id = "eda6a8e9-94cb-4897-9fa0-8da7a0dc7eba",
-                            ConcurrencyStamp = "8fc915e9-0f64-44d6-9c2c-632993346b57",
+                            Id = "a99ce00e-06d5-4912-91fc-d9771add9154",
+                            ConcurrencyStamp = "9cbfbe94-88e8-449a-a22f-e13ac577135b",
                             Name = "Manager"
                         },
                         new
                         {
-                            Id = "1225949d-3d56-4a1e-9545-4dac3fda0eef",
-                            ConcurrencyStamp = "88d110ce-f611-467b-a57e-49cf8b1e7685",
+                            Id = "087baccb-b4e8-48eb-a956-926c37d91d38",
+                            ConcurrencyStamp = "37705e90-f8f9-4fdb-baaa-45f029697050",
                             Name = "User"
                         });
                 });
@@ -387,10 +382,6 @@ namespace DBL.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("DBL.Models.Server.UserModel", null)
-                        .WithMany("MyProperty")
-                        .HasForeignKey("UserModelId");
 
                     b.Navigation("Job");
 
@@ -484,8 +475,6 @@ namespace DBL.Migrations
             modelBuilder.Entity("DBL.Models.Server.UserModel", b =>
                 {
                     b.Navigation("Jobs");
-
-                    b.Navigation("MyProperty");
 
                     b.Navigation("Projects");
                 });

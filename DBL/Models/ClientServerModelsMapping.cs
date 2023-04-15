@@ -20,7 +20,7 @@ namespace DBL.Models
                 EndDate = job.EndDate,
                 EstimetedTime = job.EstimetedTime,
                 SpentTime = job.SpentTime,
-                Progreess = job.Progreess,
+                Progress = job.Progress,
                 Status = job.Status,
                 JobRefId = job.JobRefId,
                 ProjectRefId = job.ProjectRefId

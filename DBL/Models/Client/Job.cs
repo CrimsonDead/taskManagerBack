@@ -14,7 +14,7 @@ namespace DBL.Models.Client
         public DateTime? EndDate { get; set; }
         public double? EstimetedTime { get; set; } // In hours
         public double? SpentTime { get; set; }     // In hours
-        public int? Progreess { get; set; }
+        public int? Progress { get; set; }
         [Required]
         public JobStatus Status { get; set; }
 

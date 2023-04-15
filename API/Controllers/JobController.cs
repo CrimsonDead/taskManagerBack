@@ -74,8 +74,6 @@ namespace API.Controllers
             {
                 var data = _repository.GetItem(id);
 
-                data.JobClearLinks();
-
                 if (data is null)
                     throw new Exception($"Server has no data with id {id}");
 

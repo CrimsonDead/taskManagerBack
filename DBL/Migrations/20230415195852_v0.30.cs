@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DBL.Migrations
 {
     /// <inheritdoc />
-    public partial class v02 : Migration
+    public partial class v030 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -177,14 +177,14 @@ namespace DBL.Migrations
                 columns: table => new
                 {
                     JobId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    SubJobJobId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    SubJobJobId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     EstimetedTime = table.Column<double>(type: "float", nullable: true),
                     SpentTime = table.Column<double>(type: "float", nullable: true),
-                    Progreess = table.Column<int>(type: "int", nullable: true),
+                    Progress = table.Column<int>(type: "int", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
                     JobRefId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ProjectRefId = table.Column<string>(type: "nvarchar(450)", nullable: false)
@@ -196,8 +196,7 @@ namespace DBL.Migrations
                         name: "FK_Jobs_Jobs_SubJobJobId",
                         column: x => x.SubJobJobId,
                         principalTable: "Jobs",
-                        principalColumn: "JobId",
-                        onDelete: ReferentialAction.SetNull);
+                        principalColumn: "JobId");
                     table.ForeignKey(
                         name: "FK_Jobs_Projects_ProjectRefId",
                         column: x => x.ProjectRefId,
@@ -235,8 +234,7 @@ namespace DBL.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    JobId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserModelId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    JobId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -247,11 +245,6 @@ namespace DBL.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UsersJobs_AspNetUsers_UserModelId",
-                        column: x => x.UserModelId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_UsersJobs_Jobs_JobId",
                         column: x => x.JobId,
@@ -265,9 +258,9 @@ namespace DBL.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Discriminator", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "009d5cd9-f6b2-44ab-8e9d-02e8d50d8483", "6cc3bb43-7406-47fc-9905-0862ac5e2033", "UserRoleModel", "Manager", null },
-                    { "317035be-99f5-4ed2-a1a9-81fdb4104180", "7168d24f-36e9-4d15-8e0f-6007f42c7935", "UserRoleModel", "User", null },
-                    { "fcbf87e9-c9c0-4e57-87ca-d86fa80b58b1", "4e883cd1-f475-4272-b03b-5bded871cfc9", "UserRoleModel", "Admin", null }
+                    { "087baccb-b4e8-48eb-a956-926c37d91d38", "37705e90-f8f9-4fdb-baaa-45f029697050", "UserRoleModel", "User", null },
+                    { "63875343-d75a-49f7-8e29-8eb28f8c8716", "f1f168cd-4656-4c22-bb9f-b871ab3cb8e8", "UserRoleModel", "Admin", null },
+                    { "a99ce00e-06d5-4912-91fc-d9771add9154", "9cbfbe94-88e8-449a-a22f-e13ac577135b", "UserRoleModel", "Manager", null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -323,11 +316,6 @@ namespace DBL.Migrations
                 name: "IX_UsersJobs_JobId",
                 table: "UsersJobs",
                 column: "JobId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UsersJobs_UserModelId",
-                table: "UsersJobs",
-                column: "UserModelId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UsersProjects_ProjectId",

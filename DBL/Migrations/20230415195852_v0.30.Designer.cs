@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DBL.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20230412221321_v0.2")]
-    partial class v02
+    [Migration("20230415195852_v0.30")]
+    partial class v030
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -42,7 +42,7 @@ namespace DBL.Migrations
                     b.Property<string>("JobRefId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Progreess")
+                    b.Property<int?>("Progress")
                         .HasColumnType("int");
 
                     b.Property<string>("ProjectRefId")
@@ -59,7 +59,6 @@ namespace DBL.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("SubJobJobId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Title")
@@ -100,14 +99,9 @@ namespace DBL.Migrations
                     b.Property<string>("JobId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("UserModelId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("UserId", "JobId");
 
                     b.HasIndex("JobId");
-
-                    b.HasIndex("UserModelId");
 
                     b.ToTable("UsersJobs");
                 });
@@ -342,20 +336,20 @@ namespace DBL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "fcbf87e9-c9c0-4e57-87ca-d86fa80b58b1",
-                            ConcurrencyStamp = "4e883cd1-f475-4272-b03b-5bded871cfc9",
+                            Id = "63875343-d75a-49f7-8e29-8eb28f8c8716",
+                            ConcurrencyStamp = "f1f168cd-4656-4c22-bb9f-b871ab3cb8e8",
                             Name = "Admin"
                         },
                         new
                         {
-                            Id = "009d5cd9-f6b2-44ab-8e9d-02e8d50d8483",
-                            ConcurrencyStamp = "6cc3bb43-7406-47fc-9905-0862ac5e2033",
+                            Id = "a99ce00e-06d5-4912-91fc-d9771add9154",
+                            ConcurrencyStamp = "9cbfbe94-88e8-449a-a22f-e13ac577135b",
                             Name = "Manager"
                         },
                         new
                         {
-                            Id = "317035be-99f5-4ed2-a1a9-81fdb4104180",
-                            ConcurrencyStamp = "7168d24f-36e9-4d15-8e0f-6007f42c7935",
+                            Id = "087baccb-b4e8-48eb-a956-926c37d91d38",
+                            ConcurrencyStamp = "37705e90-f8f9-4fdb-baaa-45f029697050",
                             Name = "User"
                         });
                 });
@@ -371,8 +365,7 @@ namespace DBL.Migrations
                     b.HasOne("DBL.Models.Server.JobModel", "SubJob")
                         .WithMany("Jobs")
                         .HasForeignKey("SubJobJobId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Project");
 
@@ -392,10 +385,6 @@ namespace DBL.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("DBL.Models.Server.UserModel", null)
-                        .WithMany("MyProperty")
-                        .HasForeignKey("UserModelId");
 
                     b.Navigation("Job");
 
@@ -489,8 +478,6 @@ namespace DBL.Migrations
             modelBuilder.Entity("DBL.Models.Server.UserModel", b =>
                 {
                     b.Navigation("Jobs");
-
-                    b.Navigation("MyProperty");
 
                     b.Navigation("Projects");
                 });
