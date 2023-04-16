@@ -46,6 +46,25 @@ namespace API.Controllers
             }
         }
 
+        [HttpGet("progress/", Name = "GetProjectProgress")]
+        public ActionResult<int> GetProjectProgress([FromQuery] string id)
+        {
+            try
+            {
+                var data = _repository.GetItem(id);
+
+                int? flatProgress = data.Jobs.Sum(j => j.Progress);
+
+                int progress = (int)(flatProgress / data.Jobs.Count * 100);
+
+                return Ok(progress);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpGet("item/", Name = "GetProject")]
         public ActionResult<ProjectModel> GetProject([FromQuery] string id)
         {
@@ -53,15 +72,7 @@ namespace API.Controllers
             {
                 var data = _repository.GetItem(id);
 
-                foreach (var item in data.Jobs)
-                {
-                    item.ClearLinks();
-                }
-
-                foreach (var item in data.Users)
-                {
-                    item.ClearLinks();
-                }
+                data.ClearLinks();
 
                 if (data is null)
                     throw new Exception($"Server has no data with id {id}");
