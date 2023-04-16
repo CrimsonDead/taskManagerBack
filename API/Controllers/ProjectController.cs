@@ -53,6 +53,16 @@ namespace API.Controllers
             {
                 var data = _repository.GetItem(id);
 
+                foreach (var item in data.Jobs)
+                {
+                    item.ClearLinks();
+                }
+
+                foreach (var item in data.Users)
+                {
+                    item.ClearLinks();
+                }
+
                 if (data is null)
                     throw new Exception($"Server has no data with id {id}");
 

@@ -40,40 +40,109 @@ namespace DBL.Models
             return projectModel;
         }
 
-        public static ProjectModel ProjectClearLinks(this ProjectModel project)
+        public static ProjectModel ClearLinks(this ProjectModel project)
         {
-            foreach (var item in project.Jobs)
-            {
-                item.SubJob = null;
-            }
+            if (project == null)
+                return project;
 
-            foreach (var item in project.Users)
-            {
-                item.User = null;
-                item.Project = null;
-            }
+            if (project.Jobs != null)
+                foreach (var item in project.Jobs)
+                {
+                    item.ParentJob = null;
+                    item.Project = null;
+                    item.Jobs = null;
+                    item.Users = null;
+                }
+
+            if (project.Users != null)
+                foreach (var item in project.Users)
+                {
+                    item.User = null;
+                    item.Project = null;
+                }
 
             return project;
         }
 
-        public static JobModel JobClearLinks(this JobModel job)
+        public static JobModel ClearLinks(this JobModel job)
         {
-            job.SubJob = null;
+            if (job == null)
+                return job;
 
-            job.Project = null;
-
-            foreach (var item in job.Jobs)
+            if (job.ParentJob != null)
             {
-                item.SubJob = null;
+                job.ParentJob.ParentJob = null;
+                job.ParentJob.Project = null;
+                job.ParentJob.Jobs = null;
+                job.ParentJob.Users = null;
             }
 
-            foreach (var item in job.Users)
+            if (job.Project != null)
             {
-                item.User = null;
-                item.Job = null;
+                job.Project.Jobs = null;
+                job.Project.Users = null;
             }
+
+
+            if (job.Jobs != null)
+                foreach (var item in job.Jobs)
+                {
+                    item.ParentJob = null;
+                    item.Project = null;
+                    item.Jobs = null;
+                    item.Users = null;
+                }
+
+            if (job.Users != null)
+                foreach (var item in job.Users)
+                {
+                    item.User = null;
+                    item.Job = null;
+                }
 
             return job;
+        }
+
+        public static UserJobModel ClearLinks(this UserJobModel userJob)
+        {
+            if (userJob == null)
+                return userJob;
+
+            if (userJob.User != null)
+            {
+                userJob.User.Projects = null;
+                userJob.User.Jobs = null;
+            }
+
+            if (userJob.Job != null)
+            {
+                userJob.Job.ParentJob = null;
+                userJob.Job.Project = null;
+                userJob.Job.Jobs = null;
+                userJob.Job.Users = null;
+            }
+
+            return userJob;
+        }
+
+        public static UserProject ClearLinks(this UserProjectModel userProject)
+        {
+            if (userProject == null)
+                return userProject;
+
+            if (userProject.User != null)
+            {
+                userProject.User.Projects = null;
+                userProject.User.Jobs = null;
+            }
+
+            if (userProject.Project != null)
+            {
+                userProject.Project.Jobs = null;
+                userProject.Project.Users = null;
+            }
+
+            return userProject;
         }
 
     }

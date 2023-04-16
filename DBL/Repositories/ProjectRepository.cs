@@ -44,6 +44,7 @@ namespace DBL.Repositories
         public ProjectModel Update(ProjectModel item)
         {
             _context.Projects.Update(item);
+            _context.SaveChanges();
             return item;
         }
     }

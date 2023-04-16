@@ -42,6 +42,7 @@ namespace DBL.Repositories
         public UserJobModel Update(UserJobModel item)
         {
             _context.UsersJobs.Update(item);
+            _context.SaveChanges();
             return item;
         }
     }

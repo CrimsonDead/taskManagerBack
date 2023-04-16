@@ -42,6 +42,7 @@ namespace DBL.Repositories
         public UserProjectModel Update(UserProjectModel item)
         {
             _context.UsersProjects.Update(item);
+            _context.SaveChanges();
             return item;
         }
     }

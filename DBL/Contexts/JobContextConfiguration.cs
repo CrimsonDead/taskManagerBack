@@ -37,7 +37,7 @@ namespace DBL.Contexts
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder
-                .HasOne(j => j.SubJob)
+                .HasOne(j => j.ParentJob)
                 .WithMany(j => j.Jobs)
                 .OnDelete(DeleteBehavior.NoAction);
         }

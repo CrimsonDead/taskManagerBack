@@ -8,7 +8,7 @@ namespace DBL.Models.Server
     {
         [Key]
         public string JobId { get; set; }
-        public JobModel? SubJob { get; set; }
+        public JobModel? ParentJob { get; set; }
         public ProjectModel Project { get; set; }
         public ICollection<JobModel> Jobs { get; set; }
         public ICollection<UserJobModel> Users { get; set; }
