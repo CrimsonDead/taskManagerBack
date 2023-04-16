@@ -105,7 +105,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("update/", Name = "ChangeJob")]
+        [HttpPatch("update/", Name = "ChangeJob")]
         public ActionResult ChangeJob([FromBody] IdentifiableJob job)
         {
             try

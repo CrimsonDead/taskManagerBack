@@ -103,7 +103,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("update/", Name = "ChangeProject")]
+        [HttpPatch("update/", Name = "ChangeProject")]
         public ActionResult ChangeProject([FromBody] IdentifiableProject project)
         {
             try
