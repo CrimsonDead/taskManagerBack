@@ -33,7 +33,12 @@ namespace API.Controllers
                         {
                             ProjectId = project.ProjectId,
                             Title = project.Title,
-                            Description = project.Description
+                            Description = project.Description,
+                            Progress = (int)(project.Jobs.Sum(j => j.Progress) / project.Jobs.Count * 100),
+                            TaskNum = project.Jobs.Count,
+                            CreatedTaskNum = project.Jobs.Count(j => j.Status == JobStatus.Created),
+                            InProgressTaskNum = project.Jobs.Count(j => j.Status == JobStatus.InProgreess),
+                            CompleteTaskNum = project.Jobs.Count(j => j.Status == JobStatus.Completed),
                         }
                     );
                 }
@@ -103,7 +108,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("update/", Name = "ChangeProject")]
+        [HttpPatch("update/", Name = "ChangeProject")]
         public ActionResult ChangeProject([FromBody] IdentifiableProject project)
         {
             try
