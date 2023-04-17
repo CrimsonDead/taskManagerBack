@@ -38,28 +38,37 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
 {
     options.UseSqlServer(connectionString);
 });
- 
-builder.Services.AddIdentity<UserModel, UserRoleModel>( options => 
+
+builder.Services.AddAuthentication(o =>
 {
-    options.Password.RequireDigit = true;
+    o.DefaultScheme = IdentityConstants.ApplicationScheme;
+    o.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+})
+.AddIdentityCookies(o => { });
+
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//    .AddJwtBearer(options =>
+//    {
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+//            ValidateIssuer = true,
+//            ValidIssuer = AuthOptions.ISSUER,
+//            ValidateAudience = true,
+//            ValidAudience = AuthOptions.AUDIENCE,
+//            ValidateLifetime = true,
+//            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+//            ValidateIssuerSigningKey = true,
+//        };
+//    });
+
+builder.Services.AddIdentity<UserModel, UserRoleModel>(o =>
+{
+    o.Password.RequireDigit = true;
+    o.Stores.MaxLengthForKeys = 128;
+    o.SignIn.RequireConfirmedAccount = true;
 })
 .AddDefaultTokenProviders()
 .AddEntityFrameworkStores<ApplicationContext>();
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer( options => 
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = AuthOptions.ISSUER,
-            ValidateAudience = true,
-            ValidAudience = AuthOptions.AUDIENCE,
-            ValidateLifetime = true,
-            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
-            ValidateIssuerSigningKey = true,
-         };
-    });
 
 builder.Services.AddAuthorization();
 

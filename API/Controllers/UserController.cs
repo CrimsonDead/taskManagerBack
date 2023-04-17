@@ -76,11 +76,31 @@ namespace API.Controllers
         }
 
         [HttpPost("register/", Name = "RegUser")]
-        public ActionResult RegisterUser([FromBody] User user)
+        public async Task<ActionResult<object>> RegisterUser([FromBody] User user, string password)
         {
             try
             {
-                throw new NotImplementedException();
+                //var result = await _signInManager.UserManager.CreateAsync(user, password);
+                var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
+
+                if (result.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, true);
+                    _logger.LogInformation("User successfully registered");
+                    //result = _signInManager.UserManager.GetUserId()
+                    return Ok();
+                }
+                else
+                {
+                    //List<string> errors = new List<string>();
+                    _logger.LogError("Failed to register user");
+                    //foreach (var error in result.Errors)
+                    //{
+                    //    _logger.LogError(error.Description);
+                    //    errors.Add(error.Description);
+                    //}
+                    return BadRequest("Failed to register user");
+                }
             }
             catch (Exception ex)
             {
@@ -88,7 +108,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("update/", Name = "ChangeUser")]
+        [HttpPatch("update/", Name = "ChangeUser")]
         public ActionResult ChangeUser([FromBody] User user)
         {
             try
