@@ -79,6 +79,17 @@ namespace API.Controllers
 
                 data.ClearLinks();
 
+                object ret = new {
+                    ProjectId = data.ProjectId,
+                    Title = data.Title,
+                    Description = data.Description,
+                    Progress = (int)(data.Jobs.Sum(j => j.Progress) / data.Jobs.Count * 100),
+                    CreatedTasks = data.Jobs.Where(j => j.Status == JobStatus.Created).ToList(),
+                    InProgressTasks = data.Jobs.Where(j => j.Status == JobStatus.InProgreess).ToList(),
+                    CompleteTasks = data.Jobs.Where(j => j.Status == JobStatus.Completed).ToList(),
+
+                };
+
                 if (data is null)
                     throw new Exception($"Server has no data with id {id}");
 

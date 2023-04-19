@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using DBL.Repositories;
 using Microsoft.AspNetCore.Identity;
 using DBL.Models.Client;
+using DBL.Models.Server;
 
 namespace API.Controllers
 {
@@ -9,11 +10,11 @@ namespace API.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly ILogger<User> _logger;
-        private readonly SignInManager<User> _signInManager;
-        private readonly RoleManager<UserRole> _roleManager;
+        private readonly ILogger<UserModel> _logger;
+        private readonly SignInManager<UserModel> _signInManager;
+        private readonly RoleManager<UserRoleModel> _roleManager;
 
-        public UserController(ILogger<User> logger, SignInManager<User> signInManager, RoleManager<UserRole> roleManager)
+        public UserController(ILogger<UserModel> logger, SignInManager<UserModel> signInManager, RoleManager<UserRoleModel> roleManager)
         {
             _logger = logger;
             _signInManager = signInManager;
@@ -21,7 +22,7 @@ namespace API.Controllers
         }
 
         [HttpGet("roles/", Name = "GetUserRoleList")]
-        public ActionResult<List<UserRole>> GetUserRoleList()
+        public ActionResult<List<UserRoleModel>> GetUserRoleList()
         {
             try
             {
@@ -36,38 +37,22 @@ namespace API.Controllers
             }
         }
 
-        [HttpGet("list/", Name = "GetUserList")]
-        public ActionResult<List<User>> GetUserList()
-        {
-            try
-            {
-                throw new NotImplementedException();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);                
-            }
-        }
-
-        [HttpGet("item/", Name = "GetUser")]
-        public ActionResult<User> GetUser([FromQuery] int id)
-        {
-            try
-            {
-                throw new NotImplementedException();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
         [HttpPost("login/", Name = "LoginUser")]
-        public ActionResult LoginUser([FromBody] User user)
+        public async Task<ActionResult> LoginUser([FromBody] UserModel user, string password)
         {
             try
             {
-                throw new NotImplementedException();
+                var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
+                if (result.Succeeded)
+                {
+                    _signInManager.UserManager.Users.Where(u => u.Equals(user));
+
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
             }
             catch (Exception ex)
             {
@@ -76,19 +61,21 @@ namespace API.Controllers
         }
 
         [HttpPost("register/", Name = "RegUser")]
-        public async Task<ActionResult<object>> RegisterUser([FromBody] User user, string password)
+        public async Task<ActionResult<object>> RegisterUser([FromBody] UserModel user, string password)
         {
             try
             {
                 //var result = await _signInManager.UserManager.CreateAsync(user, password);
                 var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
+                
+                var code = await _signInManager.UserManager.GenerateEmailConfirmationTokenAsync(user);
 
                 if (result.Succeeded)
                 {
-                    await _signInManager.SignInAsync(user, true);
+                    await _signInManager.SignInAsync(user, false);
                     _logger.LogInformation("User successfully registered");
                     //result = _signInManager.UserManager.GetUserId()
-                    return Ok();
+                    return Ok(await _signInManager.UserManager.GetUserIdAsync(user));
                 }
                 else
                 {
@@ -109,7 +96,7 @@ namespace API.Controllers
         }
 
         [HttpPatch("update/", Name = "ChangeUser")]
-        public ActionResult ChangeUser([FromBody] User user)
+        public ActionResult ChangeUser([FromBody] UserModel user)
         {
             try
             {
@@ -121,12 +108,14 @@ namespace API.Controllers
             }
         }
 
-        [HttpDelete("delete/", Name = "DeleteUser")]
-        public ActionResult DeleteUser([FromBody] User user)
+        [HttpGet("logout/", Name = "LogoutUser")]
+        public async Task<ActionResult> LogoutUser()
         {
             try
             {
-                throw new NotImplementedException();
+                await _signInManager.SignOutAsync();
+
+                return Ok();
             }
             catch (Exception ex)
             {

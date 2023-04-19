@@ -10,15 +10,18 @@ namespace API.Controllers
     [ApiController]
     public class JobController : ControllerBase
     {
-        private readonly IEntityRepository<JobModel, string> _repository;
+        private readonly IEntityRepository<JobModel, string> _jobRepository;
+        private readonly IEntityRepository<ProjectModel, string> _projectRepository;
         private readonly ILogger<JobModel> _logger;
-        public JobController(ILogger<JobModel> logger, IEntityRepository<JobModel, string> repository)
+        public JobController(
+            ILogger<JobModel> logger, 
+            IEntityRepository<JobModel, string> jobRepository,
+            IEntityRepository<ProjectModel, string> projectRepository)
         {
             _logger = logger;
-            _repository = repository;
+            _jobRepository = jobRepository;
+            _projectRepository = projectRepository;
         }
-
-        // TODO: [HttpGet("userlist/", Name = "GetJobUserList")]
 
         [HttpGet("statuslist/", Name = "GetJobStatusList")]
         public ActionResult<List<Job>> GetJobStatusList()
@@ -45,7 +48,7 @@ namespace API.Controllers
         {
             try
             {
-                var dataList = _repository.GetItems();
+                var dataList = _jobRepository.GetItems();
                 List<object> outList = new List<object>();
 
                 foreach (var job in dataList)
@@ -72,7 +75,7 @@ namespace API.Controllers
         {
             try
             {
-                var data = _repository.GetItem(id);
+                var data = _jobRepository.GetItem(id);
 
                 data.ClearLinks();
 
@@ -95,7 +98,17 @@ namespace API.Controllers
                 JobModel jobModel = ClientServerModelsMapping.Job2JobModel(job);
                 jobModel.JobId = Guid.NewGuid().ToString();
 
-                _repository.AddItem(jobModel);
+                if (job.ProjectRefId != "")
+                {
+                    jobModel.Project = _projectRepository.GetItem(job.ProjectRefId);
+                }
+
+                if (job.JobRefId != "")
+                {
+                    jobModel.ParentJob = _jobRepository.GetItem(job.JobRefId);
+                }
+
+                _jobRepository.AddItem(jobModel);
 
                 return Ok(jobModel.JobId);
             }
@@ -113,7 +126,7 @@ namespace API.Controllers
                 JobModel jobModel = ClientServerModelsMapping.Job2JobModel(job);
                 jobModel.JobId = job.JobId;
 
-                _repository.Update(jobModel);
+                _jobRepository.Update(jobModel);
 
                 return Ok();
             }
@@ -128,7 +141,7 @@ namespace API.Controllers
         {
             try
             {
-                _repository.Delete(jobId);
+                _jobRepository.Delete(jobId);
                 return Ok();
             }
             catch (Exception ex)
