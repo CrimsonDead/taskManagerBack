@@ -4,6 +4,7 @@ using DBL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DBL.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20230518174222_v0.5")]
+    partial class v05
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,7 +44,7 @@ namespace DBL.Migrations
                     b.Property<string>("ParentJobJobId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Progress")
+                    b.Property<int?>("Progress")
                         .HasColumnType("int");
 
                     b.Property<string>("ProjectRefId")
@@ -73,27 +75,14 @@ namespace DBL.Migrations
                     b.HasData(
                         new
                         {
-                            JobId = "2015a16e-2985-4155-9981-53f2d01b3bc2",
-                            Description = "Подготока транспорта и инструбемнов к вырубке",
-                            EndDate = new DateTime(2023, 5, 22, 7, 41, 3, 912, DateTimeKind.Local).AddTicks(7797),
+                            JobId = "9ee0a1df-bdb2-4121-9b25-3ba0c555522c",
+                            Description = "Pick Shadow Fiend as your opponent",
+                            EndDate = new DateTime(2023, 5, 19, 1, 42, 22, 107, DateTimeKind.Local).AddTicks(3588),
                             EstimetedTime = 3.5,
-                            Progress = 0,
-                            ProjectRefId = "d85a36b9-a446-4eda-aecc-38b43dd0577d",
-                            StartDate = new DateTime(2023, 5, 22, 2, 41, 3, 912, DateTimeKind.Local).AddTicks(7768),
+                            ProjectRefId = "feeef8af-1e4f-4234-827a-bd92e601819b",
+                            StartDate = new DateTime(2023, 5, 18, 20, 42, 22, 107, DateTimeKind.Local).AddTicks(3563),
                             Status = 0,
-                            Title = "Подготовка оборудования"
-                        },
-                        new
-                        {
-                            JobId = "5de1bb68-11c1-43ec-8375-8d9204bf82fe",
-                            Description = "Вырубка",
-                            EndDate = new DateTime(2023, 5, 22, 7, 41, 3, 912, DateTimeKind.Local).AddTicks(7824),
-                            EstimetedTime = 3.5,
-                            Progress = 0,
-                            ProjectRefId = "d85a36b9-a446-4eda-aecc-38b43dd0577d",
-                            StartDate = new DateTime(2023, 5, 22, 2, 41, 3, 912, DateTimeKind.Local).AddTicks(7823),
-                            Status = 0,
-                            Title = "Вырубка"
+                            Title = "Pick Shadow Fiend"
                         });
                 });
 
@@ -109,6 +98,9 @@ namespace DBL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("pts")
+                        .HasColumnType("int");
+
                     b.HasKey("ProjectId");
 
                     b.ToTable("Projects");
@@ -116,9 +108,10 @@ namespace DBL.Migrations
                     b.HasData(
                         new
                         {
-                            ProjectId = "d85a36b9-a446-4eda-aecc-38b43dd0577d",
+                            ProjectId = "feeef8af-1e4f-4234-827a-bd92e601819b",
                             Description = "Shadow fiend ",
-                            Title = "Вырубка леса в секторе 8"
+                            Title = "ZXC lobby",
+                            pts = 0
                         });
                 });
 
@@ -151,24 +144,21 @@ namespace DBL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "500fbbf9-c8b4-4eb7-842c-a173e54c160d",
-                            ConcurrencyStamp = "0c5248b5-bb83-4c6a-92af-9be9ed384245",
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
+                            Id = "0f164b83-f30e-471f-9939-a7fcae95caa0",
+                            ConcurrencyStamp = "568631c8-daae-4e09-9550-196ce19bd7b5",
+                            Name = "Admin"
                         },
                         new
                         {
-                            Id = "6c1edc2e-d5fc-4eb6-b78a-c908e249db34",
-                            ConcurrencyStamp = "883e1568-eed7-41c4-bbcf-91e8353f78cb",
-                            Name = "Manager",
-                            NormalizedName = "MANAGER"
+                            Id = "8ff88b2f-86e2-40a8-8879-15e276f0f29d",
+                            ConcurrencyStamp = "1ae8fbda-e034-4262-904c-b0c2df81be69",
+                            Name = "Manager"
                         },
                         new
                         {
-                            Id = "02a8e10c-6696-4354-a33e-c616d4435914",
-                            ConcurrencyStamp = "67188ac7-a4de-4463-8e22-8348f1510c39",
-                            Name = "User",
-                            NormalizedName = "USER"
+                            Id = "d51db1a7-e87e-4c75-957d-ce37b35cc66b",
+                            ConcurrencyStamp = "bd6582ba-438b-4cf3-87d9-cbef394ea778",
+                            Name = "User"
                         });
                 });
 
@@ -214,6 +204,9 @@ namespace DBL.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<int>("Pts")
+                        .HasColumnType("int");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -235,21 +228,6 @@ namespace DBL.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "4eafad46-6245-4306-95fe-1c5c22c8611f",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "fa5de024-a522-478d-8797-34d48fd5d097",
-                            Email = "Amin@a.min",
-                            EmailConfirmed = true,
-                            LockoutEnabled = false,
-                            PhoneNumber = "123",
-                            PhoneNumberConfirmed = false,
-                            TwoFactorEnabled = false,
-                            UserName = "Admin"
-                        });
                 });
 
             modelBuilder.Entity("DBL.Models.Server.UserJob", b =>
@@ -369,13 +347,6 @@ namespace DBL.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = "4eafad46-6245-4306-95fe-1c5c22c8611f",
-                            RoleId = "500fbbf9-c8b4-4eb7-842c-a173e54c160d"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>

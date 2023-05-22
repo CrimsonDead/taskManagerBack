@@ -4,6 +4,7 @@ using DBL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DBL.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20230519192732_vo.52")]
+    partial class vo52
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -73,27 +75,15 @@ namespace DBL.Migrations
                     b.HasData(
                         new
                         {
-                            JobId = "2015a16e-2985-4155-9981-53f2d01b3bc2",
-                            Description = "Подготока транспорта и инструбемнов к вырубке",
-                            EndDate = new DateTime(2023, 5, 22, 7, 41, 3, 912, DateTimeKind.Local).AddTicks(7797),
+                            JobId = "d2804b2c-fc4c-452d-b88c-eb78e078a5e5",
+                            Description = "Pick Shadow Fiend as your opponent",
+                            EndDate = new DateTime(2023, 5, 20, 3, 27, 30, 735, DateTimeKind.Local).AddTicks(9097),
                             EstimetedTime = 3.5,
                             Progress = 0,
-                            ProjectRefId = "d85a36b9-a446-4eda-aecc-38b43dd0577d",
-                            StartDate = new DateTime(2023, 5, 22, 2, 41, 3, 912, DateTimeKind.Local).AddTicks(7768),
+                            ProjectRefId = "002a91d5-cf94-4ca8-a672-bcb4c0783205",
+                            StartDate = new DateTime(2023, 5, 19, 22, 27, 30, 735, DateTimeKind.Local).AddTicks(9072),
                             Status = 0,
-                            Title = "Подготовка оборудования"
-                        },
-                        new
-                        {
-                            JobId = "5de1bb68-11c1-43ec-8375-8d9204bf82fe",
-                            Description = "Вырубка",
-                            EndDate = new DateTime(2023, 5, 22, 7, 41, 3, 912, DateTimeKind.Local).AddTicks(7824),
-                            EstimetedTime = 3.5,
-                            Progress = 0,
-                            ProjectRefId = "d85a36b9-a446-4eda-aecc-38b43dd0577d",
-                            StartDate = new DateTime(2023, 5, 22, 2, 41, 3, 912, DateTimeKind.Local).AddTicks(7823),
-                            Status = 0,
-                            Title = "Вырубка"
+                            Title = "Pick Shadow Fiend"
                         });
                 });
 
@@ -116,9 +106,9 @@ namespace DBL.Migrations
                     b.HasData(
                         new
                         {
-                            ProjectId = "d85a36b9-a446-4eda-aecc-38b43dd0577d",
+                            ProjectId = "002a91d5-cf94-4ca8-a672-bcb4c0783205",
                             Description = "Shadow fiend ",
-                            Title = "Вырубка леса в секторе 8"
+                            Title = "ZXC lobby"
                         });
                 });
 
@@ -151,22 +141,22 @@ namespace DBL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "500fbbf9-c8b4-4eb7-842c-a173e54c160d",
-                            ConcurrencyStamp = "0c5248b5-bb83-4c6a-92af-9be9ed384245",
+                            Id = "c8024814-d7e6-4965-81db-52cd7ada67e7",
+                            ConcurrencyStamp = "ef3ab250-08f7-41f8-98ac-b420ffb27027",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "6c1edc2e-d5fc-4eb6-b78a-c908e249db34",
-                            ConcurrencyStamp = "883e1568-eed7-41c4-bbcf-91e8353f78cb",
+                            Id = "925bc42e-37a4-43df-ab36-f544f8fa0ccb",
+                            ConcurrencyStamp = "657668ea-f941-440f-ac9e-8f7f5b1c5923",
                             Name = "Manager",
                             NormalizedName = "MANAGER"
                         },
                         new
                         {
-                            Id = "02a8e10c-6696-4354-a33e-c616d4435914",
-                            ConcurrencyStamp = "67188ac7-a4de-4463-8e22-8348f1510c39",
+                            Id = "4f0a04ce-ce6b-4439-8f87-1b1dbf3249a8",
+                            ConcurrencyStamp = "dc8c061b-2ce7-43a0-9f5d-e1c3bb0d4b2c",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -235,21 +225,6 @@ namespace DBL.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "4eafad46-6245-4306-95fe-1c5c22c8611f",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "fa5de024-a522-478d-8797-34d48fd5d097",
-                            Email = "Amin@a.min",
-                            EmailConfirmed = true,
-                            LockoutEnabled = false,
-                            PhoneNumber = "123",
-                            PhoneNumberConfirmed = false,
-                            TwoFactorEnabled = false,
-                            UserName = "Admin"
-                        });
                 });
 
             modelBuilder.Entity("DBL.Models.Server.UserJob", b =>
@@ -369,13 +344,6 @@ namespace DBL.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = "4eafad46-6245-4306-95fe-1c5c22c8611f",
-                            RoleId = "500fbbf9-c8b4-4eb7-842c-a173e54c160d"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>

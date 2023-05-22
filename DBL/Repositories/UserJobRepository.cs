@@ -1,10 +1,15 @@
 ﻿using DBL.Contexts;
 using DBL.Models.Server;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DBL.Repositories
 {
     public class UserJobRepository :
-        IRelationEntityRepository<UserJobModel, string, string>
+        IRelationEntityRepository<UserJob, string, string>
     {
         private readonly ApplicationContext _context;
 
@@ -13,9 +18,9 @@ namespace DBL.Repositories
             _context = context;
         }
 
-        public UserJobModel AddItem(UserJobModel item)
+        public UserJob AddItem(UserJob item)
         {
-            _context.UsersJobs.Add(item);
+            _context.UserJobs.Add(item);
             _context.SaveChanges();
             return item;
         }
@@ -23,25 +28,27 @@ namespace DBL.Repositories
         public void Delete(string userId, string JobId)
         {
             var item = GetItem(userId, JobId);
-            _context.UsersJobs.Remove(item);
+            _context.UserJobs.Remove(item);
             _context.SaveChanges();
         }
 
-        public UserJobModel GetItem(string userId, string JobId)
+        public UserJob GetItem(string userId, string JobId)
         {
-            return _context.UsersJobs.FirstOrDefault(
+            var item = _context.UserJobs.FirstOrDefault(
                 up => up.UserId == userId && up.JobId == JobId
             );
+
+            return item;
         }
 
-        public IEnumerable<UserJobModel> GetItems()
+        public IEnumerable<UserJob> GetItems()
         {
-            return _context.UsersJobs.ToList();
+            return _context.UserJobs.ToList();
         }
 
-        public UserJobModel Update(UserJobModel item)
+        public UserJob Update(UserJob item)
         {
-            _context.UsersJobs.Update(item);
+            _context.UserJobs.Update(item);
             _context.SaveChanges();
             return item;
         }

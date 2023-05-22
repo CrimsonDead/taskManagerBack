@@ -3,24 +3,26 @@ using DBL.Repositories;
 using DBL.Models;
 using DBL.Models.Client;
 using DBL.Models.Server;
+using Microsoft.AspNetCore.Identity;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class JobController : ControllerBase
     {
-        private readonly IEntityRepository<JobModel, string> _jobRepository;
-        private readonly IEntityRepository<ProjectModel, string> _projectRepository;
-        private readonly ILogger<JobModel> _logger;
+        private readonly IEntityRepository<Job, string> _jobRepository;
+        private readonly ILogger<Job> _logger;
+        private readonly SignInManager<User> _signInManager;
+
         public JobController(
-            ILogger<JobModel> logger, 
-            IEntityRepository<JobModel, string> jobRepository,
-            IEntityRepository<ProjectModel, string> projectRepository)
+            ILogger<Job> logger, 
+            IEntityRepository<Job, string> jobRepository,
+            SignInManager<User> signInManager)
         {
             _logger = logger;
             _jobRepository = jobRepository;
-            _projectRepository = projectRepository;
+            _signInManager = signInManager;
         }
 
         [HttpGet("statuslist/", Name = "GetJobStatusList")]
@@ -43,22 +45,28 @@ namespace API.Controllers
             }
         }
 
-        [HttpGet("list/", Name = "GetJobList")]
-        public ActionResult<List<object>> GetJobList()
+        [HttpGet("projectjoblist/", Name = "GetJobListByProject")]
+        public ActionResult<List<JobListedReturn>> GetJobListByProject([FromQuery] string projectId)
         {
             try
             {
-                var dataList = _jobRepository.GetItems();
-                List<object> outList = new List<object>();
+                var dataList = _jobRepository.GetItems().Where(j => 
+                    j.ProjectRefId == projectId &&
+                    j.JobRefId == null).ToList();
+
+                List<JobListedReturn> outList = new List<JobListedReturn>();
 
                 foreach (var job in dataList)
                 {
-                    outList.Add( 
-                        new {
-                            JobId = job.JobId, 
-                            Title = job.Title, 
-                            Description = job.Description 
-                        } 
+                    outList.Add(
+                        new JobListedReturn
+                        {
+                            JobId = job.JobId,
+                            Title = job.Title,
+                            Description = job.Description,
+                            Progress = job.Progress,
+                            Status = job.Status,
+                        }
                     );
                 }
 
@@ -66,23 +74,79 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);                
+                return BadRequest(ex.Message);
             }
         }
 
         [HttpGet("item/", Name = "GetJob")]
-        public ActionResult<JobModel> GetJob([FromQuery] string id)
+        public ActionResult<Job> GetJob([FromQuery] string id)
         {
             try
             {
                 var data = _jobRepository.GetItem(id);
 
-                data.ClearLinks();
-
                 if (data is null)
                     throw new Exception($"Server has no data with id {id}");
 
-                return Ok(data);
+                var ret = new JobItemReturn
+                {
+                    JobId = data.JobId,
+                    Title = data.Title,
+                    Description = data.Description,
+                    StartDate = data.StartDate,
+                    EndDate = data.EndDate,
+                    EstimetedTime = data.EstimetedTime,
+                    SpentTime = data.SpentTime,
+                    Status = data.Status,
+                    Progress = data.Progress,
+                    ProjectRefId = data.ProjectRefId,
+                    JobRefId = data.JobRefId,
+
+                    SubTasks = Task.Run(() =>
+                    {
+                        List<JobListedReturn> returnedTaskList = new List<JobListedReturn>();
+                        var subTaskList = data.Jobs.ToList();
+
+                        foreach (var item in subTaskList)
+                        {
+                            returnedTaskList.Add(
+                                new JobListedReturn
+                                {
+                                    JobId = item.JobId,
+                                    Title = item.Title,
+                                    Description = item.Description,
+                                    Progress = item.Progress,
+                                    Status = item.Status
+                                });
+                        }
+
+                        return returnedTaskList;
+                    }).Result,
+
+                    Users = Task.Run(() =>
+                    {
+                        List<UserListedReturn> returnedUserList = new List<UserListedReturn>();
+
+                        var createdTasklList = data.Users.Where(uj =>
+                            uj.JobId == data.JobId).ToList();
+
+                        foreach (var item in createdTasklList)
+                        {
+                            var user = _signInManager.UserManager.FindByIdAsync(item.UserId).Result;
+
+                            returnedUserList.Add(
+                                new UserListedReturn
+                                {
+                                    Id = user.Id,
+                                    Login = user.UserName,
+                                });
+                        }
+
+                        return returnedUserList;
+                    }).Result
+                };
+
+                return Ok(ret);
             }
             catch (Exception ex)
             {
@@ -91,26 +155,27 @@ namespace API.Controllers
         }
 
         [HttpPost("create/", Name = "AddJob")]
-        public ActionResult AddJob([FromBody] Job job)
+        public ActionResult AddJob([FromBody] JobCreateIn job)
         {
             try
             {
-                JobModel jobModel = ClientServerModelsMapping.Job2JobModel(job);
-                jobModel.JobId = Guid.NewGuid().ToString();
-
-                if (job.ProjectRefId != "")
+                Job newJob = new()
                 {
-                    jobModel.Project = _projectRepository.GetItem(job.ProjectRefId);
-                }
+                    JobId = Guid.NewGuid().ToString(),
+                    Title = job.Title,
+                    Description = job.Description,
+                    StartDate = job.StartDate,
+                    EndDate = job.EndDate,
+                    EstimetedTime = job.EstimetedTime,
+                    SpentTime = job.SpentTime,
+                    Progress = job.Progress,
+                    ProjectRefId = job.ProjectRefId,
+                    JobRefId = job.JobRefId,
+                };
 
-                if (job.JobRefId != "")
-                {
-                    jobModel.ParentJob = _jobRepository.GetItem(job.JobRefId);
-                }
+                _jobRepository.AddItem(newJob);
 
-                _jobRepository.AddItem(jobModel);
-
-                return Ok(jobModel.JobId);
+                return Ok(newJob.JobId);
             }
             catch (Exception ex)
             {
@@ -119,14 +184,23 @@ namespace API.Controllers
         }
 
         [HttpPatch("update/", Name = "ChangeJob")]
-        public ActionResult ChangeJob([FromBody] IdentifiableJob job)
+        public ActionResult ChangeJob([FromBody] JobUpdateIn job)
         {
             try
             {
-                JobModel jobModel = ClientServerModelsMapping.Job2JobModel(job);
-                jobModel.JobId = job.JobId;
+                Job updatedJob = _jobRepository.GetItem(job.JobId);
 
-                _jobRepository.Update(jobModel);
+                updatedJob.Title = job.Title;
+                updatedJob.Description = job.Description;
+                updatedJob.StartDate = job.StartDate;
+                updatedJob.EndDate = job.EndDate;
+                updatedJob.EstimetedTime = job.EstimetedTime;
+                updatedJob.SpentTime = job.SpentTime;
+                updatedJob.Progress = job.Progress;
+                updatedJob.ProjectRefId = job.ProjectRefId;
+                updatedJob.JobRefId = job.JobRefId;
+
+                _jobRepository.Update(updatedJob);
 
                 return Ok();
             }
@@ -137,11 +211,12 @@ namespace API.Controllers
         }
 
         [HttpDelete("delete/", Name = "DeleteJob")]
-        public ActionResult DeleteJob([FromBody] string jobId)
+        public ActionResult DeleteJob([FromQuery] string jobId)
         {
             try
             {
                 _jobRepository.Delete(jobId);
+
                 return Ok();
             }
             catch (Exception ex)

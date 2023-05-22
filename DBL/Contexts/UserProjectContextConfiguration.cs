@@ -1,17 +1,22 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DBL.Models.Server;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using DBL.Models.Server;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DBL.Contexts
 {
-    public class UserProjectContextConfiguration : IEntityTypeConfiguration<UserProjectModel>
+    public class UserProjectContextConfiguration : IEntityTypeConfiguration<UserProject>
     {
         public UserProjectContextConfiguration()
         {
 
         }
 
-        public void Configure(EntityTypeBuilder<UserProjectModel> builder)
+        public void Configure(EntityTypeBuilder<UserProject> builder)
         {
             builder
                 .HasKey(up => new { up.UserId, up.ProjectId });
