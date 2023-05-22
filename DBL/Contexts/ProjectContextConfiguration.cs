@@ -4,7 +4,7 @@ using DBL.Models.Server;
 
 namespace DBL.Contexts
 {
-    public class ProjectContextConfiguration : IEntityTypeConfiguration<ProjectModel>
+    internal class ProjectContextConfiguration : IEntityTypeConfiguration<Project>
     {
         private Guid[] _ids;
         public ProjectContextConfiguration(Guid[] ids)
@@ -12,22 +12,25 @@ namespace DBL.Contexts
             _ids = ids;
         }
 
-        private void SeedData(EntityTypeBuilder<JobModel> builder)
+        private void SeedData(EntityTypeBuilder<Project> builder)
         {
             builder
                 .HasData(
-                    new ProjectModel
+                    new Project
                     {
                         ProjectId = _ids[0].ToString(),
-                        Title = "ZXC lobby",
+                        Title = "Вырубка леса в секторе 8",
                         Description = "Shadow fiend "
                     }
                 );
         }
 
-        public void Configure(EntityTypeBuilder<ProjectModel> builder)
+        public void Configure(EntityTypeBuilder<Project> builder)
         {
-            
+            builder
+                .HasKey(p => new { p.ProjectId });
+
+            SeedData(builder);
         }
     }
 }

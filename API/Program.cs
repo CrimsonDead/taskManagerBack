@@ -39,12 +39,12 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseSqlServer(connectionString);
 });
 
-builder.Services.AddAuthentication(o =>
-{
-    o.DefaultScheme = IdentityConstants.ApplicationScheme;
-    o.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-})
-.AddIdentityCookies(o => { });
+//builder.Services.AddAuthentication(o =>
+//{
+//    o.DefaultScheme = IdentityConstants.ApplicationScheme;
+//    o.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+//})
+//.AddIdentityCookies(o => { });
 
 //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 //    .AddJwtBearer(options =>
@@ -61,7 +61,7 @@ builder.Services.AddAuthentication(o =>
 //        };
 //    });
 
-builder.Services.AddIdentity<UserModel, UserRoleModel>(o =>
+builder.Services.AddIdentity<User, Role>(o =>
 {
     o.Password.RequireDigit = true;
     o.Stores.MaxLengthForKeys = 128;
@@ -76,10 +76,10 @@ builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IEntityRepository<JobModel, string>, JobRepository>();
-builder.Services.AddScoped<IEntityRepository<ProjectModel, string>, ProjectRepository>();
-builder.Services.AddScoped<IRelationEntityRepository<UserJobModel, string, string>, UserJobRepository>();
-builder.Services.AddScoped<IRelationEntityRepository<UserProjectModel, string, string>, UserProjectRepository>();
+builder.Services.AddScoped<IEntityRepository<Job, string>, JobRepository>();
+builder.Services.AddScoped<IEntityRepository<Project, string>, ProjectRepository>();
+builder.Services.AddScoped<IRelationEntityRepository<UserJob, string, string>, UserJobRepository>();
+builder.Services.AddScoped<IRelationEntityRepository<UserProject, string, string>, UserProjectRepository>();
 
 var app = builder.Build();
 
@@ -99,12 +99,13 @@ else
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseCors(AllowSpecificOrigins);
-
-app.UseAuthorization();
-app.UseAuthentication();
 
 app.Map("/here", () => { return $"I'm here"; });
 app.MapControllers();
+
+app.UseCors(AllowSpecificOrigins);
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();

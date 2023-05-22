@@ -1,17 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DBL.Models.Server;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using DBL.Models.Server;
 
 namespace DBL.Contexts
 {
-    public class UserJobContextConfiguration : IEntityTypeConfiguration<UserJobModel>
+    public class UserJobContextConfiguration : IEntityTypeConfiguration<UserJob>
     {
         public UserJobContextConfiguration()
         {
 
         }
 
-        public void Configure(EntityTypeBuilder<UserJobModel> builder)
+        public void Configure(EntityTypeBuilder<UserJob> builder)
         {
             builder
                 .HasKey(uj => new { uj.UserId, uj.JobId });

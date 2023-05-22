@@ -1,27 +1,26 @@
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using DBL.Models.Server;
+﻿using DBL.Models.Server;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DBL.Models.Client
 {
-    public class Job
+    public class JobItemReturn
     {
-        [Required]
+        public string JobId { get; set; }
         public string Title { get; set; }
         public string? Description { get; set; }
-        [Required]
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public double? EstimetedTime { get; set; } // In hours
         public double? SpentTime { get; set; }     // In hours
         public int? Progress { get; set; }
-        [Required]
         public JobStatus Status { get; set; }
-
-        [ForeignKey("Job")]
         public string? JobRefId { get; set; }
-        [ForeignKey("Project")]
-        [Required]
         public string ProjectRefId { get; set; }
+        public List<JobListedReturn> SubTasks { get; set; }
+        public List<UserListedReturn> Users { get; set; }
     }
 }

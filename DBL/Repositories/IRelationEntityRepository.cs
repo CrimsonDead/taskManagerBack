@@ -12,4 +12,5 @@ namespace DBL.Repositories
         TEntity GetItem(TKey1 id1, TKey2 id2);
         void Delete(TKey1 id1, TKey2 id2);
     }
+
 }

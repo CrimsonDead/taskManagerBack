@@ -1,10 +1,10 @@
-using DBL.Contexts;
+﻿using DBL.Contexts;
 using DBL.Models.Server;
 
 namespace DBL.Repositories
 {
-    public class UserProjectRepository : 
-        IRelationEntityRepository<UserProjectModel, string, string>
+    public class UserProjectRepository :
+        IRelationEntityRepository<UserProject, string, string>
     {
         private readonly ApplicationContext _context;
 
@@ -13,9 +13,9 @@ namespace DBL.Repositories
             _context = context;
         }
 
-        public UserProjectModel AddItem(UserProjectModel item)
+        public UserProject AddItem(UserProject item)
         {
-            _context.UsersProjects.Add(item);
+            _context.UserProjects.Add(item);
             _context.SaveChanges();
             return item;
         }
@@ -23,25 +23,25 @@ namespace DBL.Repositories
         public void Delete(string userId, string projectId)
         {
             var item = GetItem(userId, projectId);
-            _context.UsersProjects.Remove(item);
+            _context.UserProjects.Remove(item);
             _context.SaveChanges();
         }
 
-        public UserProjectModel GetItem(string userId, string projectId)
+        public UserProject GetItem(string userId, string projectId)
         {
-            return _context.UsersProjects.FirstOrDefault(
+            return _context.UserProjects.FirstOrDefault(
                 up => up.UserId == userId && up.ProjectId == projectId
             );
         }
 
-        public IEnumerable<UserProjectModel> GetItems()
+        public IEnumerable<UserProject> GetItems()
         {
-            return _context.UsersProjects.ToList();
+            return _context.UserProjects.ToList();
         }
 
-        public UserProjectModel Update(UserProjectModel item)
+        public UserProject Update(UserProject item)
         {
-            _context.UsersProjects.Update(item);
+            _context.UserProjects.Update(item);
             _context.SaveChanges();
             return item;
         }

@@ -1,16 +1,16 @@
-using DBL.Contexts;
+﻿using DBL.Contexts;
 using DBL.Models.Server;
 
 namespace DBL.Repositories
 {
-    public class JobRepository : IEntityRepository<JobModel, string>
+    public class JobRepository : IEntityRepository<Job, string>
     {
         private readonly ApplicationContext _context;
         public JobRepository(ApplicationContext context)
         {
-            _context = context;          
+            _context = context;
         }
-        public JobModel AddItem(JobModel item)
+        public Job AddItem(Job item)
         {
             _context.Jobs.Add(item);
             _context.SaveChanges();
@@ -24,24 +24,27 @@ namespace DBL.Repositories
             _context.SaveChanges();
         }
 
-        public JobModel GetItem(string id)
+        public Job GetItem(string id)
         {
             var item = _context.Jobs.FirstOrDefault(j => j.JobId == id);
 
-            item.ParentJob = _context.Jobs.FirstOrDefault(j => j.JobId == item.JobRefId);
+            item.ParentJob = _context.Jobs.FirstOrDefault(j =>
+                j.JobRefId != null &&
+                j.JobId == item.JobRefId);
+
             item.Project = _context.Projects.FirstOrDefault(p => p.ProjectId == item.ProjectRefId);
             item.Jobs = _context.Jobs.Where(j => j.JobRefId == item.JobId).ToList();
-            item.Users = _context.UsersJobs.Where(uj => uj.JobId == item.JobId).ToList();
+            item.Users = _context.UserJobs.Where(uj => uj.JobId == item.JobId).ToList();
 
             return item;
         }
 
-        public IEnumerable<JobModel> GetItems()
+        public IEnumerable<Job> GetItems()
         {
             return _context.Jobs.ToList();
         }
 
-        public JobModel Update(JobModel item)
+        public Job Update(Job item)
         {
             _context.Jobs.Update(item);
             _context.SaveChanges();
