@@ -209,10 +209,17 @@ namespace API.Controllers
                                 }
 
                                 return returnedTaskList;
+                            }).Result, 
+
+                            Role = Task.Run(() =>
+                            {
+                                var roles = _signInManager.UserManager.GetRolesAsync(serverUser).Result;
+
+                                return roles.Contains("Admin") == false ? roles.Contains("Manager") == false ? roles.Contains("User") == false ? "User" : "User" : "Manager" : "Amin"; 
                             }).Result
                         };
 
-                    return Ok(serverUser);
+                    return Ok(clientUser);
                 }
                 else
                 {
@@ -296,10 +303,17 @@ namespace API.Controllers
                                 }
 
                                 return returnedTaskList;
+                            }).Result,
+
+                            Role = Task.Run(() =>
+                            {
+                                var roles = _signInManager.UserManager.GetRolesAsync(serverUser).Result;
+
+                                return roles.Contains("Admin") == false ? roles.Contains("Manager") == false ? roles.Contains("User") == false ? "User" : "User" : "Manager" : "Admin";
                             }).Result
                         };
 
-                    return Ok(serverUser);
+                    return Ok(clientUser);
                 }
                 else
                 {
@@ -324,7 +338,80 @@ namespace API.Controllers
 
                 if (result.Succeeded)
                 {
-                    return Ok();
+                    var serverUser = await _signInManager.UserManager.FindByNameAsync(userLogin.Login);
+
+                    var retUser =
+                        new UserItemReturn
+                        {
+                            Id = serverUser.Id,
+                            UserName = serverUser.UserName,
+                            Email = serverUser.Email,
+                            PhoneNumber = serverUser.PhoneNumber,
+
+                            Projects = Task.Run(() =>
+                            {
+                                List<ProjectListedReturn> returnedProjectList = new List<ProjectListedReturn>();
+
+                                var userProjectList = _userProjectRepository.GetItems().Where(up =>
+                                    up.UserId == serverUser.Id).ToList();
+
+
+                                foreach (var item in userProjectList)
+                                {
+                                    returnedProjectList.Add(
+                                        new ProjectListedReturn
+                                        {
+                                            ProjectId = item.Project.ProjectId,
+                                            Title = item.Project.Title,
+                                            Description = item.Project.Description,
+
+                                            Progress = item.Project.Jobs.Count != 0 ?
+                                                (int)(item.Project.Jobs.Sum(j => j.Progress) / item.Project.Jobs.Count * 100) : 0,
+
+                                            TaskNum = item.Project.Jobs.Count,
+                                            CreatedTaskNum = item.Project.Jobs.Count(j => j.Status == JobStatus.Created),
+                                            InProgressTaskNum = item.Project.Jobs.Count(j => j.Status == JobStatus.InProgreess),
+                                            CompleteTaskNum = item.Project.Jobs.Count(j => j.Status == JobStatus.Completed),
+
+                                        });
+                                }
+
+                                return returnedProjectList;
+                            }).Result,
+
+                            Jobs = Task.Run(() =>
+                            {
+                                List<JobListedReturn> returnedTaskList = new List<JobListedReturn>();
+
+                                var createdTasklList = _userJobRepository.GetItems().Where(uj =>
+                                    uj.JobId == serverUser.Id).ToList();
+
+
+                                foreach (var item in createdTasklList)
+                                {
+                                    returnedTaskList.Add(
+                                        new JobListedReturn
+                                        {
+                                            JobId = item.Job.JobId,
+                                            Title = item.Job.Title,
+                                            Description = item.Job.Description,
+                                            Progress = item.Job.Progress,
+                                            Status = item.Job.Status
+                                        });
+                                }
+
+                                return returnedTaskList;
+                            }).Result,
+
+                            Role = Task.Run(() =>
+                            {
+                                var roles = _signInManager.UserManager.GetRolesAsync(serverUser).Result;
+
+                                return roles.Contains("Admin") == false ? roles.Contains("Manager") == false ? roles.Contains("User") == false ? "User" : "User" : "Manager" : "Admin";
+                            }).Result
+                        };
+
+                    return Ok(retUser);
                 }
                 else
                 {
@@ -357,19 +444,23 @@ namespace API.Controllers
 
                 var signInResult = await _signInManager.PasswordSignInAsync(user, userCridentials.Password, true, false);
 
-                Role role = _roleManager.Roles.FirstOrDefault(r => r.Name == "User");
-
-                if (role == null)
-                    throw new Exception("Wrong role name");
-
-                var assignResult = await _signInManager.UserManager.AddToRoleAsync(
-                    _signInManager.UserManager.FindByIdAsync(user.Id).Result,
-                    role.Name);
-                
-                //var code = await _signInManager.UserManager.GenerateEmailConfirmationTokenAsync(user);
-
                 if (signInResult.Succeeded && regiterResult.Succeeded)
                 {
+                    Role role = _roleManager.Roles.FirstOrDefault(r => r.Name == "User");
+
+                    if (role == null)
+                        throw new Exception("Wrong role name");
+
+                    var assignResult = await _signInManager.UserManager.AddToRoleAsync(
+                        _signInManager.UserManager.FindByIdAsync(user.Id).Result,
+                        role.Name);
+
+                    //var code = await _signInManager.UserManager.GenerateEmailConfirmationTokenAsync(user);
+
+                    var serverUser = await _signInManager.UserManager.FindByNameAsync(user.UserName);
+
+                    _signInManager.ClaimsFactory.CreateAsync(serverUser);
+
                     await _signInManager.SignInAsync(user, false);
                     _logger.LogInformation("User successfully registered");
                     return Ok();

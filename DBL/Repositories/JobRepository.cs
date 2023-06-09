@@ -29,7 +29,8 @@ namespace DBL.Repositories
             var item = _context.Jobs.FirstOrDefault(j => j.JobId == id);
 
             item.ParentJob = _context.Jobs.FirstOrDefault(j =>
-                j.JobRefId != null &&
+                (j.JobRefId != null ||
+                j.JobRefId != string.Empty) &&
                 j.JobId == item.JobRefId);
 
             item.Project = _context.Projects.FirstOrDefault(p => p.ProjectId == item.ProjectRefId);
