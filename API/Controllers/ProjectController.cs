@@ -105,7 +105,8 @@ namespace API.Controllers
                         var createdTasklList = data.Jobs.Where(j => 
                             j.Status == JobStatus.Created && 
                             j.ProjectRefId == data.ProjectId &&
-                            j.JobRefId == null).ToList();
+                            (j.JobRefId == null ||
+                            j.JobRefId == string.Empty)).ToList();
 
                         foreach (var item in createdTasklList)
                         {
@@ -130,7 +131,8 @@ namespace API.Controllers
                         var createdTasklList = data.Jobs.Where(j =>
                             j.Status == JobStatus.InProgreess &&
                             j.ProjectRefId == data.ProjectId &&
-                            j.JobRefId == null).ToList();
+                            (j.JobRefId == null ||
+                            j.JobRefId == string.Empty)).ToList();
 
                         foreach (var item in createdTasklList)
                         {
@@ -155,7 +157,8 @@ namespace API.Controllers
                         var createdTasklList = data.Jobs.Where(j =>
                             j.Status == JobStatus.Completed &&
                             j.ProjectRefId == data.ProjectId &&
-                            j.JobRefId == null).ToList();
+                            (j.JobRefId == null ||
+                            j.JobRefId == string.Empty)).ToList();
 
                         foreach (var item in createdTasklList)
                         {

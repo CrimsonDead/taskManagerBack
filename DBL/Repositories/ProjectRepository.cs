@@ -32,7 +32,8 @@ namespace DBL.Repositories
 
             item.Jobs = _context.Jobs.Where(j => 
                 j.ProjectRefId == item.ProjectId &&
-                j.JobRefId == null).ToList();
+                (j.JobRefId == null ||
+                j.JobRefId == string.Empty)).ToList();
 
             item.Users = _context.UserProjects.Where(up => up.ProjectId == item.ProjectId).ToList();
 
@@ -47,7 +48,8 @@ namespace DBL.Repositories
             {
                 item.Jobs = _context.Jobs.Where(j => 
                     j.ProjectRefId == item.ProjectId &&
-                    j.JobRefId == null).ToList();
+                    (j.JobRefId == null ||
+                    j.JobRefId == string.Empty)).ToList();
                 item.Users = _context.UserProjects.Where(up => up.ProjectId == item.ProjectId).ToList();
             }
 

@@ -52,7 +52,8 @@ namespace API.Controllers
             {
                 var dataList = _jobRepository.GetItems().Where(j => 
                     j.ProjectRefId == projectId &&
-                    j.JobRefId == null).ToList();
+                    (j.JobRefId == null ||
+                    j.JobRefId == string.Empty)).ToList();
 
                 List<JobListedReturn> outList = new List<JobListedReturn>();
 
