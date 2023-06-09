@@ -3,38 +3,47 @@ using DBL.Repositories;
 using DBL.Models;
 using DBL.Models.Client;
 using DBL.Models.Server;
+using Microsoft.AspNetCore.Identity;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class ProjectController : ControllerBase
     {
-        private readonly IEntityRepository<ProjectModel, string> _repository;
-        private readonly ILogger<ProjectModel> _logger;
-        public ProjectController(ILogger<ProjectModel> logger, IEntityRepository<ProjectModel, string> repository)
+        private readonly IEntityRepository<Project, string> _repository;
+        private readonly SignInManager<User> _signInManager;
+        private readonly ILogger<Project> _logger;
+        public ProjectController(
+            ILogger<Project> logger, 
+            IEntityRepository<Project, string> repository,
+            SignInManager<User> signInManager)
         {
             _logger = logger;
             _repository = repository;
+            _signInManager = signInManager;
         }
 
         [HttpGet("list/", Name = "GetProjectList")]
-        public ActionResult<List<object>> GetProjectList()
+        public ActionResult<List<ProjectListedReturn>> GetProjectList()
         {
             try
             {
                 var dataList = _repository.GetItems();
-                List<object> outList = new List<object>();
+                List<ProjectListedReturn> outList = new List<ProjectListedReturn>();
 
                 foreach (var project in dataList)
                 {
                     outList.Add(
-                        new
+                        new ProjectListedReturn
                         {
                             ProjectId = project.ProjectId,
                             Title = project.Title,
                             Description = project.Description,
-                            Progress = (int)(project.Jobs.Sum(j => j.Progress) / project.Jobs.Count * 100),
+
+                            Progress = project.Jobs.Count != 0 ? 
+                                (int)(project.Jobs.Sum(j => j.Progress) / project.Jobs.Count * 100) : 0,
+
                             TaskNum = project.Jobs.Count,
                             CreatedTaskNum = project.Jobs.Count(j => j.Status == JobStatus.Created),
                             InProgressTaskNum = project.Jobs.Count(j => j.Status == JobStatus.InProgreess),
@@ -52,7 +61,7 @@ namespace API.Controllers
         }
 
         [HttpGet("progress/", Name = "GetProjectProgress")]
-        public ActionResult<int> GetProjectProgress([FromQuery] string id)
+        public ActionResult<int> GetProjectProgress([FromBody] string id)
         {
             try
             {
@@ -71,29 +80,126 @@ namespace API.Controllers
         }
 
         [HttpGet("item/", Name = "GetProject")]
-        public ActionResult<ProjectModel> GetProject([FromQuery] string id)
+        public ActionResult<ProjectItemReturn> GetProject([FromQuery] string id)
         {
             try
             {
                 var data = _repository.GetItem(id);
 
-                data.ClearLinks();
-
-                object ret = new {
-                    ProjectId = data.ProjectId,
-                    Title = data.Title,
-                    Description = data.Description,
-                    Progress = (int)(data.Jobs.Sum(j => j.Progress) / data.Jobs.Count * 100),
-                    CreatedTasks = data.Jobs.Where(j => j.Status == JobStatus.Created).ToList(),
-                    InProgressTasks = data.Jobs.Where(j => j.Status == JobStatus.InProgreess).ToList(),
-                    CompleteTasks = data.Jobs.Where(j => j.Status == JobStatus.Completed).ToList(),
-
-                };
-
                 if (data is null)
                     throw new Exception($"Server has no data with id {id}");
 
-                return Ok(data);
+                var ret = new ProjectItemReturn {
+                    ProjectId = data.ProjectId,
+                    Title = data.Title,
+                    Description = data.Description,
+                    TaskNum = data.Jobs.Count,
+
+                    Progress = data.Jobs.Count != 0 ?
+                                (int)(data.Jobs.Sum(j => j.Progress) / data.Jobs.Count * 100) : 0,
+
+                    CreatedTasks = Task.Run(() =>
+                    {
+                        List<JobListedReturn> returnedTaskList = new List<JobListedReturn>();
+                        
+                        var createdTasklList = data.Jobs.Where(j => 
+                            j.Status == JobStatus.Created && 
+                            j.ProjectRefId == data.ProjectId &&
+                            (j.JobRefId == null ||
+                            j.JobRefId == string.Empty)).ToList();
+
+                        foreach (var item in createdTasklList)
+                        {
+                            returnedTaskList.Add(
+                                new JobListedReturn
+                                {
+                                    JobId = item.JobId,
+                                    Title = item.Title,
+                                    Description = item.Description,
+                                    Progress = item.Progress,
+                                    Status = item.Status
+                                });
+                        }
+
+                        return returnedTaskList;
+                    }).Result,
+
+                    InProgressTasks = Task.Run(() =>
+                    {
+                        List<JobListedReturn> returnedTaskList = new List<JobListedReturn>();
+                        
+                        var createdTasklList = data.Jobs.Where(j =>
+                            j.Status == JobStatus.InProgreess &&
+                            j.ProjectRefId == data.ProjectId &&
+                            (j.JobRefId == null ||
+                            j.JobRefId == string.Empty)).ToList();
+
+                        foreach (var item in createdTasklList)
+                        {
+                            returnedTaskList.Add(
+                                new JobListedReturn
+                                {
+                                    JobId = item.JobId,
+                                    Title = item.Title,
+                                    Description = item.Description,
+                                    Progress = item.Progress,
+                                    Status = item.Status
+                                });
+                        }
+
+                        return returnedTaskList;
+                    }).Result,
+
+                    CompleteTasks = Task.Run(() =>
+                    {
+                        List<JobListedReturn> returnedTaskList = new List<JobListedReturn>();
+                        
+                        var createdTasklList = data.Jobs.Where(j =>
+                            j.Status == JobStatus.Completed &&
+                            j.ProjectRefId == data.ProjectId &&
+                            (j.JobRefId == null ||
+                            j.JobRefId == string.Empty)).ToList();
+
+                        foreach (var item in createdTasklList)
+                        {
+                            returnedTaskList.Add(
+                                new JobListedReturn
+                                {
+                                    JobId = item.JobId,
+                                    Title = item.Title,
+                                    Description = item.Description,
+                                    Progress = item.Progress,
+                                    Status = item.Status
+                                });
+                        }
+
+                        return returnedTaskList;
+                    }).Result,
+
+                    Users = Task.Run(() =>
+                    {
+                        List<UserListedReturn> returnedUserList = new List<UserListedReturn>();
+
+                        var createdTasklList = data.Users.Where(up =>
+                            up.ProjectId == data.ProjectId).ToList();
+
+                        foreach (var item in createdTasklList)
+                        {
+                            var user = _signInManager.UserManager.FindByIdAsync(item.UserId).Result;
+
+                            returnedUserList.Add(
+                                new UserListedReturn
+                                {
+                                    Id = user.Id,
+                                    Login = user.UserName,
+                                });
+                        }
+
+                        return returnedUserList;
+                    }).Result
+                };
+
+                return Ok(ret);
             }
             catch (Exception ex)
             {
@@ -102,16 +208,20 @@ namespace API.Controllers
         }
 
         [HttpPost("create/", Name = "AddProject")]
-        public ActionResult AddProject([FromBody] Project project)
+        public ActionResult AddProject([FromBody] ProjectCreateIn project)
         {
             try
             {
-                ProjectModel projectModel = ClientServerModelsMapping.Project2ProjectModel(project);
-                projectModel.ProjectId = Guid.NewGuid().ToString();
+                Project newProject = new()
+                {
+                    ProjectId = Guid.NewGuid().ToString(),
+                    Title = project.Title,
+                    Description = project.Description,
+                };
 
-                _repository.AddItem(projectModel);
+                _repository.AddItem(newProject);
 
-                return Ok(projectModel.ProjectId);
+                return Ok(newProject.ProjectId);
             }
             catch (Exception ex)
             {
@@ -120,14 +230,16 @@ namespace API.Controllers
         }
 
         [HttpPatch("update/", Name = "ChangeProject")]
-        public ActionResult ChangeProject([FromBody] IdentifiableProject project)
+        public ActionResult ChangeProject([FromBody] ProjectUpdateIn project)
         {
             try
             {
-                ProjectModel projectModel = ClientServerModelsMapping.Project2ProjectModel(project);
-                projectModel.ProjectId = project.ProjectId;
+                Project updatedProject = _repository.GetItem(project.ProjectId);
 
-                _repository.Update(projectModel);
+                updatedProject.Title = project.Title;
+                updatedProject.Description = project.Description;
+
+                _repository.Update(updatedProject);
 
                 return Ok();
             }
@@ -138,11 +250,12 @@ namespace API.Controllers
         }
 
         [HttpDelete("delete/", Name = "DeleteProject")]
-        public ActionResult DeleteProject([FromBody] string projectId)
+        public ActionResult DeleteProject([FromQuery] string projectId)
         {
             try
             {
                 _repository.Delete(projectId);
+
                 return Ok();
             }
             catch (Exception ex)

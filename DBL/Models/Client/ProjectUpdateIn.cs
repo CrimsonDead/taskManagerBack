@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace DBL.Models.Client
 {
-    public class IdentifiableProject : Project
+    public class ProjectUpdateIn
     {
         public string ProjectId { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
     }
 }

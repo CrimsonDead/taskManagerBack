@@ -3,14 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace DBL.Migrations
 {
-    /// <inheritdoc />
-    public partial class v030 : Migration
+    public partial class v05 : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -18,7 +14,6 @@ namespace DBL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -33,6 +28,7 @@ namespace DBL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Pts = table.Column<int>(type: "int", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -59,7 +55,8 @@ namespace DBL.Migrations
                 {
                     ProjectId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    pts = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -112,8 +109,8 @@ namespace DBL.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    ProviderKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
@@ -157,8 +154,8 @@ namespace DBL.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -177,7 +174,6 @@ namespace DBL.Migrations
                 columns: table => new
                 {
                     JobId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    SubJobJobId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -187,14 +183,15 @@ namespace DBL.Migrations
                     Progress = table.Column<int>(type: "int", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
                     JobRefId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ProjectRefId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    ProjectRefId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ParentJobJobId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Jobs", x => x.JobId);
                     table.ForeignKey(
-                        name: "FK_Jobs_Jobs_SubJobJobId",
-                        column: x => x.SubJobJobId,
+                        name: "FK_Jobs_Jobs_ParentJobJobId",
+                        column: x => x.ParentJobJobId,
                         principalTable: "Jobs",
                         principalColumn: "JobId");
                     table.ForeignKey(
@@ -206,7 +203,7 @@ namespace DBL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UsersProjects",
+                name: "UserProjects",
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -214,15 +211,15 @@ namespace DBL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UsersProjects", x => new { x.UserId, x.ProjectId });
+                    table.PrimaryKey("PK_UserProjects", x => new { x.UserId, x.ProjectId });
                     table.ForeignKey(
-                        name: "FK_UsersProjects_AspNetUsers_UserId",
+                        name: "FK_UserProjects_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UsersProjects_Projects_ProjectId",
+                        name: "FK_UserProjects_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "ProjectId",
@@ -230,7 +227,7 @@ namespace DBL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UsersJobs",
+                name: "UserJobs",
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -238,15 +235,15 @@ namespace DBL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UsersJobs", x => new { x.UserId, x.JobId });
+                    table.PrimaryKey("PK_UserJobs", x => new { x.UserId, x.JobId });
                     table.ForeignKey(
-                        name: "FK_UsersJobs_AspNetUsers_UserId",
+                        name: "FK_UserJobs_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UsersJobs_Jobs_JobId",
+                        name: "FK_UserJobs_Jobs_JobId",
                         column: x => x.JobId,
                         principalTable: "Jobs",
                         principalColumn: "JobId",
@@ -255,13 +252,23 @@ namespace DBL.Migrations
 
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
-                columns: new[] { "Id", "ConcurrencyStamp", "Discriminator", "Name", "NormalizedName" },
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "087baccb-b4e8-48eb-a956-926c37d91d38", "37705e90-f8f9-4fdb-baaa-45f029697050", "UserRoleModel", "User", null },
-                    { "63875343-d75a-49f7-8e29-8eb28f8c8716", "f1f168cd-4656-4c22-bb9f-b871ab3cb8e8", "UserRoleModel", "Admin", null },
-                    { "a99ce00e-06d5-4912-91fc-d9771add9154", "9cbfbe94-88e8-449a-a22f-e13ac577135b", "UserRoleModel", "Manager", null }
+                    { "0f164b83-f30e-471f-9939-a7fcae95caa0", "568631c8-daae-4e09-9550-196ce19bd7b5", "Admin", null },
+                    { "8ff88b2f-86e2-40a8-8879-15e276f0f29d", "1ae8fbda-e034-4262-904c-b0c2df81be69", "Manager", null },
+                    { "d51db1a7-e87e-4c75-957d-ce37b35cc66b", "bd6582ba-438b-4cf3-87d9-cbef394ea778", "User", null }
                 });
+
+            migrationBuilder.InsertData(
+                table: "Projects",
+                columns: new[] { "ProjectId", "Description", "Title", "pts" },
+                values: new object[] { "feeef8af-1e4f-4234-827a-bd92e601819b", "Shadow fiend ", "ZXC lobby", 0 });
+
+            migrationBuilder.InsertData(
+                table: "Jobs",
+                columns: new[] { "JobId", "Description", "EndDate", "EstimetedTime", "JobRefId", "ParentJobJobId", "Progress", "ProjectRefId", "SpentTime", "StartDate", "Status", "Title" },
+                values: new object[] { "9ee0a1df-bdb2-4121-9b25-3ba0c555522c", "Pick Shadow Fiend as your opponent", new DateTime(2023, 5, 19, 1, 42, 22, 107, DateTimeKind.Local).AddTicks(3588), 3.5, null, null, null, "feeef8af-1e4f-4234-827a-bd92e601819b", null, new DateTime(2023, 5, 18, 20, 42, 22, 107, DateTimeKind.Local).AddTicks(3563), 0, "Pick Shadow Fiend" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -303,27 +310,26 @@ namespace DBL.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Jobs_ParentJobJobId",
+                table: "Jobs",
+                column: "ParentJobJobId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Jobs_ProjectRefId",
                 table: "Jobs",
                 column: "ProjectRefId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Jobs_SubJobJobId",
-                table: "Jobs",
-                column: "SubJobJobId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UsersJobs_JobId",
-                table: "UsersJobs",
+                name: "IX_UserJobs_JobId",
+                table: "UserJobs",
                 column: "JobId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UsersProjects_ProjectId",
-                table: "UsersProjects",
+                name: "IX_UserProjects_ProjectId",
+                table: "UserProjects",
                 column: "ProjectId");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
@@ -342,10 +348,10 @@ namespace DBL.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "UsersJobs");
+                name: "UserJobs");
 
             migrationBuilder.DropTable(
-                name: "UsersProjects");
+                name: "UserProjects");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

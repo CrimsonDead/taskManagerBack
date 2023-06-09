@@ -1,15 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using DBL.Models.Server;
+using Microsoft.AspNetCore.Identity;
 
 namespace DBL.Contexts
 {
-    public class ApplicationContext : IdentityDbContext<UserModel>
+    public class ApplicationContext : IdentityDbContext<User, Role, string>
     {
-        public DbSet<JobModel> Jobs { get; set; }
-        public DbSet<ProjectModel> Projects { get; set; }
-        public DbSet<UserJobModel> UsersJobs { get; set; }
-        public DbSet<UserProjectModel> UsersProjects { get; set; }
+        public DbSet<Job> Jobs { get; set; }
+        public DbSet<Project> Projects { get; set; }
+        public DbSet<UserProject> UserProjects { get; set; }
+        public DbSet<UserJob> UserJobs { get; set; }
 
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
@@ -24,33 +25,53 @@ namespace DBL.Contexts
         {
             base.OnModelCreating(builder);
 
-            var ids = new Guid[] {Guid.NewGuid()};
+            var ids = new Guid[] {Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()};
 
             builder.ApplyConfiguration(new ProjectContextConfiguration(ids));
             builder.ApplyConfiguration(new JobContextConfiguration(ids));
-            builder.ApplyConfiguration(new UserJobContextConfiguration());
             builder.ApplyConfiguration(new UserProjectContextConfiguration());
+            builder.ApplyConfiguration(new UserJobContextConfiguration());
 
-
-            builder.Entity<UserRoleModel>()
+            builder.Entity<Role>()
                 .HasData(
-                    new UserRoleModel
+                    new Role
                     {
-                        Id = Guid.NewGuid().ToString(),
-                        Name = "Admin"
+                        Id = ids[1].ToString(),
+                        Name = "Admin",
+                        NormalizedName = "ADMIN"
                     },
-                    new UserRoleModel
+                    new Role
                     {
                         Id = Guid.NewGuid().ToString(),
-                        Name = "Manager"
+                        Name = "Manager",
+                        NormalizedName = "MANAGER"
                     },
-                    new UserRoleModel
+                    new Role
                     {
                         Id = Guid.NewGuid().ToString(),
-                        Name = "User"
+                        Name = "User",
+                        NormalizedName = "USER"
                     }
                 );
 
+            builder.Entity<User>()
+                .HasData(
+                    new User
+                    {
+                        Id = ids[2].ToString(),
+                        UserName = "Admin",
+                        Email = "Amin@a.min",
+                        EmailConfirmed = true,
+                        PhoneNumber = "123",
+                    });
+
+            builder.Entity<IdentityUserRole<string>>()
+                .HasData(
+                    new IdentityUserRole<string>
+                    {
+                        UserId = ids[2].ToString(),
+                        RoleId = ids[1].ToString()
+                    });
         }
     }
 }

@@ -1,10 +1,10 @@
+using DBL.Models.Server;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using DBL.Models.Server;
 
 namespace DBL.Contexts
 {
-    public class JobContextConfiguration : IEntityTypeConfiguration<JobModel>
+    internal class JobContextConfiguration : IEntityTypeConfiguration<Job>
     {
         private Guid[] _ids;
         public JobContextConfiguration(Guid[] ids)
@@ -12,25 +12,38 @@ namespace DBL.Contexts
             _ids = ids;
         }
 
-        private void SeedData(EntityTypeBuilder<JobModel> builder)
+        private void SeedData(EntityTypeBuilder<Job> builder)
         {
             builder
                 .HasData(
-                    new JobModel
+                    new Job
                     {
                         JobId           = Guid.NewGuid().ToString(),
-                        Title           = "Pick Shadow Fiend",
-                        Description     = "Pick Shadow Fiend as your opponent",
+                        Title           = "Подготовка оборудования",
+                        Description     = "Подготока транспорта и инструбемнов к вырубке",
                         ProjectRefId    = _ids[0].ToString(),
                         StartDate       = DateTime.Now,
                         EndDate         = DateTime.Now + TimeSpan.FromHours(5.0f),
                         EstimetedTime   = 3.5d
+                    },
+                    new Job
+                    {
+                        JobId = Guid.NewGuid().ToString(),
+                        Title = "Вырубка",
+                        Description = "Вырубка",
+                        ProjectRefId = _ids[0].ToString(),
+                        StartDate = DateTime.Now,
+                        EndDate = DateTime.Now + TimeSpan.FromHours(5.0f),
+                        EstimetedTime = 3.5d
                     }
                 );
         }
 
-        public void Configure(EntityTypeBuilder<JobModel> builder)
+        public void Configure(EntityTypeBuilder<Job> builder)
         {
+            builder
+                .HasKey(j => new { j.JobId });
+
             builder
                 .HasOne(j => j.Project)
                 .WithMany(p => p.Jobs)
@@ -40,6 +53,8 @@ namespace DBL.Contexts
                 .HasOne(j => j.ParentJob)
                 .WithMany(j => j.Jobs)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            SeedData(builder);
         }
     }
 }

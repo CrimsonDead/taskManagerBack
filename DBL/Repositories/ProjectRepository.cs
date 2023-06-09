@@ -1,9 +1,9 @@
-using DBL.Contexts;
+﻿using DBL.Contexts;
 using DBL.Models.Server;
 
 namespace DBL.Repositories
 {
-    public class ProjectRepository : IEntityRepository<ProjectModel, string>
+    public class ProjectRepository : IEntityRepository<Project, string>
     {
         private readonly ApplicationContext _context;
 
@@ -12,7 +12,7 @@ namespace DBL.Repositories
             _context = context;
         }
 
-        public ProjectModel AddItem(ProjectModel item)
+        public Project AddItem(Project item)
         {
             _context.Projects.Add(item);
             _context.SaveChanges();
@@ -26,22 +26,37 @@ namespace DBL.Repositories
             _context.SaveChanges();
         }
 
-        public ProjectModel GetItem(string id)
+        public Project GetItem(string id)
         {
             var item = _context.Projects.FirstOrDefault(p => p.ProjectId == id);
 
-            item.Jobs = _context.Jobs.Where(j => j.ProjectRefId == item.ProjectId).ToList();
-            item.Users = _context.UsersProjects.Where(up => up.ProjectId == item.ProjectId).ToList();
+            item.Jobs = _context.Jobs.Where(j => 
+                j.ProjectRefId == item.ProjectId &&
+                (j.JobRefId == null ||
+                j.JobRefId == string.Empty)).ToList();
+
+            item.Users = _context.UserProjects.Where(up => up.ProjectId == item.ProjectId).ToList();
 
             return item;
         }
 
-        public IEnumerable<ProjectModel> GetItems()
+        public IEnumerable<Project> GetItems()
         {
-            return _context.Projects.ToList();
+            var itemList = _context.Projects.ToList();
+
+            foreach (var item in itemList)
+            {
+                item.Jobs = _context.Jobs.Where(j => 
+                    j.ProjectRefId == item.ProjectId &&
+                    (j.JobRefId == null ||
+                    j.JobRefId == string.Empty)).ToList();
+                item.Users = _context.UserProjects.Where(up => up.ProjectId == item.ProjectId).ToList();
+            }
+
+            return itemList;
         }
 
-        public ProjectModel Update(ProjectModel item)
+        public Project Update(Project item)
         {
             _context.Projects.Update(item);
             _context.SaveChanges();

@@ -1,35 +1,325 @@
 using Microsoft.AspNetCore.Mvc;
-using DBL.Repositories;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using System.Security.Claims;
+using DBL.Repositories;
 using DBL.Models.Client;
 using DBL.Models.Server;
+using DBL.Models;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly ILogger<UserModel> _logger;
-        private readonly SignInManager<UserModel> _signInManager;
-        private readonly RoleManager<UserRoleModel> _roleManager;
+        private readonly ILogger<User> _logger;
+        private readonly SignInManager<User> _signInManager;
+        private readonly RoleManager<Role> _roleManager;
+        private readonly IRelationEntityRepository<UserJob, string, string> _userJobRepository;
+        private readonly IRelationEntityRepository<UserProject, string, string> _userProjectRepository;
 
-        public UserController(ILogger<UserModel> logger, SignInManager<UserModel> signInManager, RoleManager<UserRoleModel> roleManager)
+        public UserController(
+            ILogger<User> logger, 
+            SignInManager<User> signInManager, 
+            RoleManager<Role> roleManager,
+            IRelationEntityRepository<UserJob, string, string> userJobRepository,
+            IRelationEntityRepository<UserProject, string, string> userProjectRepository)
         {
             _logger = logger;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _userJobRepository = userJobRepository;
+            _userProjectRepository = userProjectRepository;
+        }
+
+        [HttpPost("assigntorole/", Name = "AssignToRole")]
+        public async Task<ActionResult> AssignToRole([FromQuery] string roleName, string userId)
+        {
+            try
+            {
+                Role role = _roleManager.Roles.FirstOrDefault(r => r.Name == roleName);
+
+                if (role == null)
+                    throw new Exception("Wrong role name");
+
+                var assignResult = await _signInManager.UserManager.AddToRoleAsync(
+                    _signInManager.UserManager.FindByIdAsync(userId).Result,
+                    role.Name);
+
+                if (!assignResult.Succeeded)
+                {
+                    List<string> errors = new List<string>();
+
+                    foreach (var error in assignResult.Errors)
+                    {
+                        _logger.LogError(error.Description);
+                        errors.Add(error.Description);
+                    }
+
+                    _logger.LogError("Failed to register user");
+                    return BadRequest(errors);
+                }
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("assigntoprojct/", Name = "AssignToProjeect")]
+        public ActionResult AssignToProjeect([FromQuery] string projectId, string userId)
+        {
+            try
+            {
+                UserProject userProject = new()
+                {
+                    UserId = userId,
+                    ProjectId = projectId,
+                };
+
+                _userProjectRepository.AddItem(userProject);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("assigntojob/", Name = "AssignToJob")]
+        public ActionResult AssignToJob([FromQuery] string jobId, string userId)
+        {
+            try
+            {
+                UserJob userJob = new()
+                {
+                    UserId = userId,
+                    JobId = jobId,
+                };
+
+                _userJobRepository.AddItem(userJob);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("roles/", Name = "GetUserRoleList")]
-        public ActionResult<List<UserRoleModel>> GetUserRoleList()
+        public ActionResult<List<RoleListedReturn>> GetUserRoleList()
         {
             try
             {
                 var roleList = _roleManager.Roles.ToList();
+                List<RoleListedReturn> outList = new List<RoleListedReturn>();
+
                 if (roleList.Count() == 0)
                     throw new Exception("Server has no data");
-                return Ok(roleList);
+
+                foreach (var item in roleList)
+                {
+                    outList.Add(
+                        new RoleListedReturn
+                        {
+                            Id = item.Id,
+                            Name = item.Name
+                        });
+                }
+
+                return Ok(outList);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("user/", Name = "GetUser")]
+        public async Task<ActionResult<UserItemReturn>> GetUser()
+        {
+            try
+            {
+                var serverUser = await _signInManager.UserManager.GetUserAsync(_signInManager.Context.User);
+
+                if (serverUser != null)
+                {
+                    var clientUser =
+                        new UserItemReturn
+                        {
+                            Id = serverUser.Id,
+                            UserName = serverUser.UserName,
+                            Email = serverUser.Email,
+                            PhoneNumber = serverUser.PhoneNumber,
+
+                            Projects = Task.Run(() =>
+                            {
+                                List<ProjectListedReturn> returnedProjectList = new List<ProjectListedReturn>();
+
+                                var userProjectList = _userProjectRepository.GetItems().Where(up =>
+                                    up.UserId == serverUser.Id).ToList();
+
+                                foreach (var item in userProjectList)
+                                {
+                                    returnedProjectList.Add(
+                                        new ProjectListedReturn 
+                                        {
+                                            ProjectId = item.Project.ProjectId,
+                                            Title = item.Project.Title,
+                                            Description = item.Project.Description,
+                                            
+                                            Progress = item.Project.Jobs.Count != 0 ?
+                                                (int)(item.Project.Jobs.Sum(j => j.Progress) / item.Project.Jobs.Count * 100) : 0,
+                                            
+                                            TaskNum = item.Project.Jobs.Count,
+                                            CreatedTaskNum = item.Project.Jobs.Count(j => j.Status == JobStatus.Created),
+                                            InProgressTaskNum = item.Project.Jobs.Count(j => j.Status == JobStatus.InProgreess),
+                                            CompleteTaskNum = item.Project.Jobs.Count(j => j.Status == JobStatus.Completed),
+
+                                        });
+                                }
+
+                                return returnedProjectList;
+                            }).Result,
+
+                            Jobs = Task.Run(() =>
+                            {
+                                List<JobListedReturn> returnedTaskList = new List<JobListedReturn>();
+
+                                var createdTasklList = _userJobRepository.GetItems().Where(uj =>
+                                    uj.JobId == serverUser.Id).ToList();
+
+
+                                foreach (var item in createdTasklList)
+                                {
+                                    returnedTaskList.Add(
+                                        new JobListedReturn
+                                        {
+                                            JobId = item.Job.JobId,
+                                            Title = item.Job.Title,
+                                            Description = item.Job.Description,
+                                            Progress = item.Job.Progress,
+                                            Status = item.Job.Status
+                                        });
+                                }
+
+                                return returnedTaskList;
+                            }).Result, 
+
+                            Role = Task.Run(() =>
+                            {
+                                var roles = _signInManager.UserManager.GetRolesAsync(serverUser).Result;
+
+                                return roles.Contains("Admin") == false ? roles.Contains("Manager") == false ? roles.Contains("User") == false ? "User" : "User" : "Manager" : "Amin"; 
+                            }).Result
+                        };
+
+                    return Ok(clientUser);
+                }
+                else
+                {
+                    throw new Exception("Not authorized");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("userbyid/", Name = "GetUserById")]
+        public async Task<ActionResult<UserItemReturn>> GetUserById([FromQuery] string id)
+        {
+            try
+            {
+                var serverUser = await _signInManager.UserManager.FindByIdAsync(id);
+
+                if (serverUser != null)
+                {
+                    var clientUser =
+                        new UserItemReturn
+                        {
+                            Id = serverUser.Id,
+                            UserName = serverUser.UserName,
+                            Email = serverUser.Email,
+                            PhoneNumber = serverUser.PhoneNumber,
+
+                            Projects = Task.Run(() =>
+                            {
+                                List<ProjectListedReturn> returnedProjectList = new List<ProjectListedReturn>();
+
+                                var userProjectList = _userProjectRepository.GetItems().Where(up =>
+                                    up.UserId == serverUser.Id).ToList();
+
+
+                                foreach (var item in userProjectList)
+                                {
+                                    returnedProjectList.Add(
+                                        new ProjectListedReturn
+                                        {
+                                            ProjectId = item.Project.ProjectId,
+                                            Title = item.Project.Title,
+                                            Description = item.Project.Description,
+
+                                            Progress = item.Project.Jobs.Count != 0 ?
+                                                (int)(item.Project.Jobs.Sum(j => j.Progress) / item.Project.Jobs.Count * 100) : 0,
+
+                                            TaskNum = item.Project.Jobs.Count,
+                                            CreatedTaskNum = item.Project.Jobs.Count(j => j.Status == JobStatus.Created),
+                                            InProgressTaskNum = item.Project.Jobs.Count(j => j.Status == JobStatus.InProgreess),
+                                            CompleteTaskNum = item.Project.Jobs.Count(j => j.Status == JobStatus.Completed),
+
+                                        });
+                                }
+
+                                return returnedProjectList;
+                            }).Result,
+
+                            Jobs = Task.Run(() =>
+                            {
+                                List<JobListedReturn> returnedTaskList = new List<JobListedReturn>();
+
+                                var createdTasklList = _userJobRepository.GetItems().Where(uj =>
+                                    uj.JobId == serverUser.Id).ToList();
+
+
+                                foreach (var item in createdTasklList)
+                                {
+                                    returnedTaskList.Add(
+                                        new JobListedReturn
+                                        {
+                                            JobId = item.Job.JobId,
+                                            Title = item.Job.Title,
+                                            Description = item.Job.Description,
+                                            Progress = item.Job.Progress,
+                                            Status = item.Job.Status
+                                        });
+                                }
+
+                                return returnedTaskList;
+                            }).Result,
+
+                            Role = Task.Run(() =>
+                            {
+                                var roles = _signInManager.UserManager.GetRolesAsync(serverUser).Result;
+
+                                return roles.Contains("Admin") == false ? roles.Contains("Manager") == false ? roles.Contains("User") == false ? "User" : "User" : "Manager" : "Admin";
+                            }).Result
+                        };
+
+                    return Ok(clientUser);
+                }
+                else
+                {
+                    throw new Exception("Failed to get user");
+                }
+
             }
             catch (Exception ex)
             {
@@ -38,16 +328,90 @@ namespace API.Controllers
         }
 
         [HttpPost("login/", Name = "LoginUser")]
-        public async Task<ActionResult> LoginUser([FromBody] UserModel user, string password)
+        public async Task<ActionResult> LoginUser([FromBody] UserLoginIn userLogin)
         {
             try
             {
-                var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
+                await _signInManager.SignOutAsync();
+
+                var result = await _signInManager.PasswordSignInAsync(userLogin.Login, userLogin.Password, true, false);
+
                 if (result.Succeeded)
                 {
-                    _signInManager.UserManager.Users.Where(u => u.Equals(user));
+                    var serverUser = await _signInManager.UserManager.FindByNameAsync(userLogin.Login);
 
-                    return Ok();
+                    var retUser =
+                        new UserItemReturn
+                        {
+                            Id = serverUser.Id,
+                            UserName = serverUser.UserName,
+                            Email = serverUser.Email,
+                            PhoneNumber = serverUser.PhoneNumber,
+
+                            Projects = Task.Run(() =>
+                            {
+                                List<ProjectListedReturn> returnedProjectList = new List<ProjectListedReturn>();
+
+                                var userProjectList = _userProjectRepository.GetItems().Where(up =>
+                                    up.UserId == serverUser.Id).ToList();
+
+
+                                foreach (var item in userProjectList)
+                                {
+                                    returnedProjectList.Add(
+                                        new ProjectListedReturn
+                                        {
+                                            ProjectId = item.Project.ProjectId,
+                                            Title = item.Project.Title,
+                                            Description = item.Project.Description,
+
+                                            Progress = item.Project.Jobs.Count != 0 ?
+                                                (int)(item.Project.Jobs.Sum(j => j.Progress) / item.Project.Jobs.Count * 100) : 0,
+
+                                            TaskNum = item.Project.Jobs.Count,
+                                            CreatedTaskNum = item.Project.Jobs.Count(j => j.Status == JobStatus.Created),
+                                            InProgressTaskNum = item.Project.Jobs.Count(j => j.Status == JobStatus.InProgreess),
+                                            CompleteTaskNum = item.Project.Jobs.Count(j => j.Status == JobStatus.Completed),
+
+                                        });
+                                }
+
+                                return returnedProjectList;
+                            }).Result,
+
+                            Jobs = Task.Run(() =>
+                            {
+                                List<JobListedReturn> returnedTaskList = new List<JobListedReturn>();
+
+                                var createdTasklList = _userJobRepository.GetItems().Where(uj =>
+                                    uj.JobId == serverUser.Id).ToList();
+
+
+                                foreach (var item in createdTasklList)
+                                {
+                                    returnedTaskList.Add(
+                                        new JobListedReturn
+                                        {
+                                            JobId = item.Job.JobId,
+                                            Title = item.Job.Title,
+                                            Description = item.Job.Description,
+                                            Progress = item.Job.Progress,
+                                            Status = item.Job.Status
+                                        });
+                                }
+
+                                return returnedTaskList;
+                            }).Result,
+
+                            Role = Task.Run(() =>
+                            {
+                                var roles = _signInManager.UserManager.GetRolesAsync(serverUser).Result;
+
+                                return roles.Contains("Admin") == false ? roles.Contains("Manager") == false ? roles.Contains("User") == false ? "User" : "User" : "Manager" : "Admin";
+                            }).Result
+                        };
+
+                    return Ok(retUser);
                 }
                 else
                 {
@@ -61,32 +425,58 @@ namespace API.Controllers
         }
 
         [HttpPost("register/", Name = "RegUser")]
-        public async Task<ActionResult<object>> RegisterUser([FromBody] UserModel user, string password)
+        public async Task<ActionResult> RegisterUser([FromBody] UserRegisterIn userCridentials)
         {
             try
             {
-                //var result = await _signInManager.UserManager.CreateAsync(user, password);
-                var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
-                
-                var code = await _signInManager.UserManager.GenerateEmailConfirmationTokenAsync(user);
-
-                if (result.Succeeded)
+                User user = new()
                 {
+                    Id = Guid.NewGuid().ToString(),
+                    UserName = userCridentials.Login,
+                    Email = userCridentials.Email,
+                    PhoneNumber = userCridentials.PhoneNumber,
+                    EmailConfirmed = true,
+                };
+
+                await _signInManager.SignOutAsync();
+
+                var regiterResult = await _signInManager.UserManager.CreateAsync(user, userCridentials.Password);
+
+                var signInResult = await _signInManager.PasswordSignInAsync(user, userCridentials.Password, true, false);
+
+                if (signInResult.Succeeded && regiterResult.Succeeded)
+                {
+                    Role role = _roleManager.Roles.FirstOrDefault(r => r.Name == "User");
+
+                    if (role == null)
+                        throw new Exception("Wrong role name");
+
+                    var assignResult = await _signInManager.UserManager.AddToRoleAsync(
+                        _signInManager.UserManager.FindByIdAsync(user.Id).Result,
+                        role.Name);
+
+                    //var code = await _signInManager.UserManager.GenerateEmailConfirmationTokenAsync(user);
+
+                    var serverUser = await _signInManager.UserManager.FindByNameAsync(user.UserName);
+
+                    _signInManager.ClaimsFactory.CreateAsync(serverUser);
+
                     await _signInManager.SignInAsync(user, false);
                     _logger.LogInformation("User successfully registered");
-                    //result = _signInManager.UserManager.GetUserId()
-                    return Ok(await _signInManager.UserManager.GetUserIdAsync(user));
+                    return Ok();
                 }
                 else
                 {
-                    //List<string> errors = new List<string>();
+                    List<string> errors = new List<string>();
+
+                    foreach (var error in regiterResult.Errors)
+                    {
+                        _logger.LogError(error.Description);
+                        errors.Add(error.Description);
+                    }
+
                     _logger.LogError("Failed to register user");
-                    //foreach (var error in result.Errors)
-                    //{
-                    //    _logger.LogError(error.Description);
-                    //    errors.Add(error.Description);
-                    //}
-                    return BadRequest("Failed to register user");
+                    return BadRequest(errors);
                 }
             }
             catch (Exception ex)
@@ -96,11 +486,30 @@ namespace API.Controllers
         }
 
         [HttpPatch("update/", Name = "ChangeUser")]
-        public ActionResult ChangeUser([FromBody] UserModel user)
+        public async Task<ActionResult> ChangeUser([FromBody] UserUpdateIn userUpdate)
         {
             try
             {
-                throw new NotImplementedException();
+                var user = await _signInManager.UserManager.GetUserAsync(_signInManager.Context.User);
+
+                user.UserName = userUpdate.Login;
+                user.NormalizedUserName = userUpdate.Login.ToUpper();
+                user.Email = userUpdate.Email;
+                user.NormalizedEmail = userUpdate.Email.ToUpper();
+                user.PhoneNumber = userUpdate.PhoneNumber;
+
+                var upateResult = await _signInManager.UserManager.UpdateAsync(user);
+
+                if (upateResult.Succeeded)
+                {
+                    _logger.LogInformation("User successfuly upated");
+                }
+                else
+                {
+                    throw new ApplicationException("Update failed");
+                }
+
+                return Ok();
             }
             catch (Exception ex)
             {
