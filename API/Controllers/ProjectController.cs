@@ -42,7 +42,7 @@ namespace API.Controllers
                             Description = project.Description,
 
                             Progress = project.Jobs.Count != 0 ? 
-                                (int)(project.Jobs.Sum(j => j.Progress) / project.Jobs.Count * 100) : 0,
+                                (int)((float)project.Jobs.Sum(j => j.Progress) / (float)(project.Jobs.Count * 100) * 100) : 0,
 
                             TaskNum = project.Jobs.Count,
                             CreatedTaskNum = project.Jobs.Count(j => j.Status == JobStatus.Created),
@@ -61,17 +61,22 @@ namespace API.Controllers
         }
 
         [HttpGet("progress/", Name = "GetProjectProgress")]
-        public ActionResult<int> GetProjectProgress([FromBody] string id)
+        public ActionResult<int> GetProjectProgress()
         {
             try
             {
-                var data = _repository.GetItem(id);
+                var data = _repository.GetItems();
 
-                int? flatProgress = data.Jobs.Sum(j => j.Progress);
+                var list = new List<int>();
 
-                int progress = (int)(flatProgress / data.Jobs.Count * 100);
+                foreach (var item in data)
+                {
+                    list.AddRange(item.Jobs.Select(j => j.Progress));
+                }
 
-                return Ok(progress);
+                int ret = (int)((float)(list.Sum(j => j) / (float)(list.Count * 100)) * 100);
+
+                return Ok(ret);
             }
             catch (Exception ex)
             {
@@ -96,7 +101,7 @@ namespace API.Controllers
                     TaskNum = data.Jobs.Count,
 
                     Progress = data.Jobs.Count != 0 ?
-                                (int)(data.Jobs.Sum(j => j.Progress) / data.Jobs.Count * 100) : 0,
+                                (int)((float)data.Jobs.Sum(j => j.Progress) / (float)(data.Jobs.Count * 100) * 100) : 0,
 
                     CreatedTasks = Task.Run(() =>
                     {
