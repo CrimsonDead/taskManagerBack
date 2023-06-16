@@ -140,12 +140,13 @@ namespace API.Controllers
             }
         }
 
-        [HttpGet("user/", Name = "GetUser")]
-        public async Task<ActionResult<UserItemReturn>> GetUser()
+        [HttpPost("user/", Name = "GetUser")]
+        public async Task<ActionResult<UserItemReturn>> GetUser(UserGetIn user)
         {
             try
             {
-                var serverUser = await _signInManager.UserManager.GetUserAsync(_signInManager.Context.User);
+                var claim = new Claim(ClaimTypes.NameIdentifier, user.Hash);
+                var serverUser = (await _signInManager.UserManager.GetUsersForClaimAsync(claim))[0];
 
                 if (serverUser != null)
                 {
@@ -341,12 +342,13 @@ namespace API.Controllers
                     var serverUser = await _signInManager.UserManager.FindByNameAsync(userLogin.Login);
 
                     var retUser =
-                        new UserItemReturn
+                        new UserLoginReturn
                         {
                             Id = serverUser.Id,
                             UserName = serverUser.UserName,
                             Email = serverUser.Email,
                             PhoneNumber = serverUser.PhoneNumber,
+                            Hash = (await _signInManager.UserManager.GetClaimsAsync(serverUser)).FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value,
 
                             Projects = Task.Run(() =>
                             {
@@ -459,7 +461,9 @@ namespace API.Controllers
 
                     var serverUser = await _signInManager.UserManager.FindByNameAsync(user.UserName);
 
-                    _signInManager.ClaimsFactory.CreateAsync(serverUser);
+                    var principal = await _signInManager.ClaimsFactory.CreateAsync(serverUser);
+
+                    var res = await _signInManager.UserManager.AddClaimsAsync(serverUser, principal.Claims.Where(c => c.Type == ClaimTypes.NameIdentifier));
 
                     await _signInManager.SignInAsync(user, false);
                     _logger.LogInformation("User successfully registered");
